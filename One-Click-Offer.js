@@ -13,7 +13,7 @@
 // @match        *://next.backpack.tf/*
 // @match        *://steamcommunity.com/tradeoffer/new*
 // @icon         data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💠</text></svg>
-// @run-at       document-start
+// @run-at       document-end
 // ==/UserScript==
 
 const allow_change = true;
