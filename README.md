@@ -20,10 +20,7 @@ This browser plugin adds a button to backpack.tf listings, which will instantly 
 
 - Install [Tampermonkey](https://www.tampermonkey.net/)
 - [Open the script](https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.js)
-- Copy link to script 
-- Download script in Tampermonkey
-![TempermonkeyImage](/images/TampermonkeyInstall.png)
-- Click to Install
+- Click install
 
 
 ### Usage
