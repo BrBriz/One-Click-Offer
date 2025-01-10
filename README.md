@@ -20,7 +20,10 @@ This browser plugin adds a button to backpack.tf listings, which will instantly 
 
 - Install [Tampermonkey](https://www.tampermonkey.net/)
 - [Open the script](https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.js)
-- Click Install
+- Copy link to script 
+- Download script in [Tampermonkey](/images/TampermonkeyInstall.png)
+- Click to Install
+
 
 ### Usage
 
@@ -30,9 +33,7 @@ This browser plugin adds a button to backpack.tf listings, which will instantly 
 
 - Click
 
-  (The Pros use middle click)
-
-- Wow!
+- After this check your steam trade offers
 
 ### Disclaimer
 
