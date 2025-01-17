@@ -2,11 +2,11 @@
 // @name         One-Click Offer (BrBriz v.)
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      1.4.0
+// @version      1.4.0.1
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz (Before 1.4.0 - Brom127)
-// @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
-// @downloadURL  https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
+// @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.js
+// @downloadURL  https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.js
 // @match        *://backpack.tf/stats/*
 // @match        *://backpack.tf/classifieds*
 // @match        *://backpack.tf/u/*
@@ -375,13 +375,14 @@ async function main() {
         if (!params.has("tscript_id")) {
             //sell your item
             const needed_item_name = params.get("tscript_name").replace("u0023", "#");
-
+            console.log("[Sell item]: needed_item_name: " + needed_item_name)
             if (document.referrer === "https://next.backpack.tf/") {
                 // next backpack uses different item names (e.g. "The" is removed)
                 our_inventory = our_inventory.map(item => ({ ...item, name: normalizeName(item.name) }));
             }
-
+            console.log("[Sell item]: My inventory: " + our_inventory)
             const needed_item = our_inventory.find(i => i.name === needed_item_name);
+            console.log("[Sell item]: needed_item: " + needed_item)
             if (!needed_item) return throwError("Could not find item in your inventory.");
 
             items_to_give.push(toTradeOfferItem(needed_item.id));
