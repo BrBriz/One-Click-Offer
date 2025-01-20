@@ -714,9 +714,9 @@ function toCurrencyTypes(currency_string) {
     const small_small_metal = Math.round(((small_metal / 11) % 1) * 100);
     console.log("[toCurrencyTypes]: small_small_metal: ", small_small_metal);
     let half_scrap;
-    if (100 > small_small_metal >= 91) {
+    if (small_small_metal >= 91 && small_small_metal < 100) {
         half_scrap = 2;
-    } else if (91 > small_small_metal >= 45) {
+    } else if (small_small_metal >= 45 && small_small_metal < 91) {
         half_scrap = 1;
     } else {
         half_scrap = 0;
