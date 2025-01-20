@@ -733,9 +733,11 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
     const inv_rec = inventory.filter(item => item.name === "Reclaimed Metal");
     const inv_scrap = inventory.filter(item => item.name === "Scrap Metal");
     const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(normalizeName(item.name)));
-    console.log("My inv_half_scrap:")
+    console.log("[pickCurrency]: My inventory:")
+    console.log(inventory)
+    console.log("[pickCurrency]: My inv_half_scrap:")
     console.log(inv_half_scrap)
-    console.log("Half_scrap in the start: " + half_scrap);
+    console.log("[pickCurrency]: Half_scrap in the start: " + half_scrap);
     if (inv_keys.length < keys) return throwError("Insufficient Keys");
     if (allow_change && inv_ref.length + inv_rec.length / 3 + inv_scrap.length / 9 + inv_half_scrap.length / 20 < ref + rec / 3 + scrap / 9 + half_scrap / 20) return throwError("Insufficient Metal");
     if (!allow_change && (inv_ref.length < ref || inv_rec.length < rec || inv_scrap.length < scrap || inv_half_scrap.length < half_scrap)) return throwError("Insufficient Metal");
