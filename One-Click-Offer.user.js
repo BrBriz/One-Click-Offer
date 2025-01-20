@@ -5,8 +5,8 @@
 // @version      1.4.0.1
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz (Before 1.4.0 - Brom127)
-// @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.js
-// @downloadURL  https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.js
+// @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
+// @downloadURL  https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
 // @match        *://backpack.tf/stats/*
 // @match        *://backpack.tf/classifieds*
 // @match        *://backpack.tf/u/*
