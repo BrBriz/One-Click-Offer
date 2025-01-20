@@ -714,9 +714,9 @@ function toCurrencyTypes(currency_string) {
     const small_small_metal = Math.round(((small_metal / 11) % 1) * 100);
     console.log("[toCurrencyTypes]: small_small_metal: ", small_small_metal);
     let half_scrap;
-    if (small_small_metal === 91) {
+    if (100 > small_small_metal >= 91) {
         half_scrap = 2;
-    } else if (small_small_metal === 45) {
+    } else if (91 > small_small_metal >= 45) {
         half_scrap = 1;
     } else {
         half_scrap = 0;
@@ -732,6 +732,12 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
     const inv_ref = inventory.filter(item => item.name === "Refined Metal");
     const inv_rec = inventory.filter(item => item.name === "Reclaimed Metal");
     const inv_scrap = inventory.filter(item => item.name === "Scrap Metal");
+    if (DEBUG) {
+        inventory.forEach(item => {
+            const found = itemsWithPriceHalfScrap.includes(item.name);
+            console.log(`${found ? '✅' : '❌'} Checking: ${item.name}`);
+         });
+    }
     const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(normalizeName(item.name)));
     console.log("[pickCurrency]: My inventory:")
     console.log(inventory)
