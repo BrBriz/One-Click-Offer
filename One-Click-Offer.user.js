@@ -738,7 +738,7 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
             console.log(`${found ? '✅' : '❌'} Checking: ${item.name}`);
          });
     }
-    const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(normalizeName(item.name)));
+    const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(item.name));
     console.log("[pickCurrency]: My inventory:")
     console.log(inventory)
     console.log("[pickCurrency]: My inv_half_scrap:")
