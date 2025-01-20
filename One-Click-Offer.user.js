@@ -406,6 +406,8 @@ async function main() {
                 const needed_item_name = params.get("tscript_name").replace("u0023", "#"); //get other instance of same item if item with exact id already sold
                 needed_item = our_inventory.find(i => i.name === needed_item_name);
             }
+            console.log("[Sell item]: My inventory: " + our_inventory)
+            console.log("[Sell item]: Their inventory: " + their_inventory)
             if (!needed_item) return throwError("Item has already been sold.");
 
             items_to_receive.push(toTradeOfferItem(needed_item.id));
@@ -699,7 +701,7 @@ function toCurrencyTypes(currency_string) {
     const small_metal = Math.round((metal % 1) * 100);
     console.log("[toCurrencyTypes]: small_metal: ", small_metal);
     const rec = Math.floor(small_metal / 33);
-    const scrap = Math.floor(small_metal / 11);
+    const scrap = Math.floor(small_metal / 11) % 3;
     console.log("[toCurrencyTypes]: Scrap: ", scrap);
     const small_small_metal = Math.round(((small_metal / 11) % 1) * 100);
     console.log("[toCurrencyTypes]: small_small_metal: ", small_small_metal);
