@@ -676,6 +676,9 @@ function normalizeName(name) {
             name = name.substring(prefix.length);
         }
     }
+    if (DEBUG) {
+        console.log("normalizeName: " + name)
+    }
     return name;
 }
 
@@ -729,8 +732,8 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
     const inv_ref = inventory.filter(item => item.name === "Refined Metal");
     const inv_rec = inventory.filter(item => item.name === "Reclaimed Metal");
     const inv_scrap = inventory.filter(item => item.name === "Scrap Metal");
-    const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(item.name));
-    console.log("My inv_half_scrap: ")
+    const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(normalizeName(item.name)));
+    console.log("My inv_half_scrap:")
     console.log(inv_half_scrap)
     console.log("Half_scrap in the start: " + half_scrap);
     if (inv_keys.length < keys) return throwError("Insufficient Keys");
