@@ -380,8 +380,10 @@ async function main() {
                 // next backpack uses different item names (e.g. "The" is removed)
                 our_inventory = our_inventory.map(item => ({ ...item, name: normalizeName(item.name) }));
             }
-            console.log("[Sell item]: My inventory: " + our_inventory)
-            console.log("[Sell item]: Their inventory: " + their_inventory)
+            console.log("[Sell item]: My inventory: ")
+            console.log(our_inventory)
+            console.log("[Sell item]: Their inventory: " )
+            console.log(their_inventory)
             const needed_item = our_inventory.find(i => i.name === needed_item_name);
             console.log("[Sell item]: needed_item: " + needed_item)
             if (!needed_item) return throwError("Could not find item in your inventory.");
@@ -407,8 +409,10 @@ async function main() {
                 const needed_item_name = params.get("tscript_name").replace("u0023", "#"); //get other instance of same item if item with exact id already sold
                 needed_item = our_inventory.find(i => i.name === needed_item_name);
             }
-            console.log("[Sell item]: My inventory: " + our_inventory)
-            console.log("[Sell item]: Their inventory: " + their_inventory)
+            console.log("[Sell item]: My inventory: ")
+            console.log(our_inventory)
+            console.log("[Sell item]: Their inventory: " )
+            console.log(their_inventory)
             if (!needed_item) return throwError("Item has already been sold.");
 
             items_to_receive.push(toTradeOfferItem(needed_item.id));
