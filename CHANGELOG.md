@@ -10,14 +10,6 @@ We use a **X.X.X.X.x** versioning system, where each number represents a specifi
 - **Fourth X (Fixes & Patches)** – The last number of the bug that was fixed ([Issue](https://github.com/BrBriz/One-Click-Offer/issues)).  
 - **Fifth x (Bad Fix)** - Possible under a problem fix version
 
-## [1.4.0] - 2025-01-10
-### Added
-- Supports trade offers that require half of scrap metal
-
-## [1.4.0.1] - 2025-01-17
-### Added
-- More debug in console ([Issue #1](https://github.com/BrBriz/One-Click-Offer/issues/1))
-
 ## [1.4.1.2] - 2025-01-21
 ### Added 
 - More debug in console ([Issue #2](https://github.com/BrBriz/One-Click-Offer/issues/2))
@@ -26,3 +18,12 @@ We use a **X.X.X.X.x** versioning system, where each number represents a specifi
 
 ### Fixed
 - In big trades script gives more scrap than needed ([Issue #2](https://github.com/BrBriz/One-Click-Offer/issues/2))
+
+## [1.4.0.1] - 2025-01-17
+### Added
+- More debug in console ([Issue #1](https://github.com/BrBriz/One-Click-Offer/issues/1))
+
+## [1.4.0] - 2025-01-10
+### Added
+- Supports trade offers that require half of scrap metal
+
