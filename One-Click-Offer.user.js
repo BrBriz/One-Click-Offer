@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         One-Click Offer (BrBriz v.)
+// @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      1.4.0.2
+// @version      1.4.1.2
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz (Before 1.4.0 - Brom127)
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -12,13 +12,13 @@
 // @match        *://backpack.tf/u/*
 // @match        *://next.backpack.tf/*
 // @match        *://steamcommunity.com/tradeoffer/new*
-// @icon         data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💠</text></svg>
+// @icon         data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔺</text></svg>
 // @run-at       document-start
 // ==/UserScript==
 
 const allow_change = true;
-const btn_color = "#02d6d6";
-const next_btn_color = "#00ffff";
+const btn_color = "#931F1D";
+const next_btn_color = "#eb2335";
 const btn_text = "One Click Offer ⇄";
 const DEBUG = false;
 
@@ -739,9 +739,9 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
          });
     }
     const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(item.name));
-    console.log("[pickCurrency]: My inventory:")
+    console.log("[pickCurrency]: Inventory:")
     console.log(inventory)
-    console.log("[pickCurrency]: My inv_half_scrap:")
+    console.log("[pickCurrency]: Inv_half_scrap:")
     console.log(inv_half_scrap)
     console.log("[pickCurrency]: Half_scrap in the start: " + half_scrap);
     if (inv_keys.length < keys) return throwError("Insufficient Keys");

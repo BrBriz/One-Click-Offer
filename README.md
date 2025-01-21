@@ -7,6 +7,7 @@ This browser plugin adds a button to backpack.tf listings, which will instantly 
 ### Features 1.4.x
 
 - Supports trade offers that require half of scrap metal
+- See everything [here](CHANGELOG.md)
 
 ### Features 1.3.X
 
@@ -27,7 +28,10 @@ This browser plugin adds a button to backpack.tf listings, which will instantly 
 
 - Simply find the blue button on the listing
 
+### backpack.tf
 ![listings with buttons](/images/SellOrder.png)
+### next.backpack.tf
+![listings with buttons](/images/NextSellOrder.png)
 
 - Click
 
