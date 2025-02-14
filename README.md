@@ -1,5 +1,9 @@
 # One-Click Offer for Backpack.tf
 
+[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://stand-with-ukraine.pp.ua)
+[![steam](https://shields.io/badge/steam-1b2838?logo=steam)](https://steamcommunity.com/id/BrBriz/)
+[![license](https://img.shields.io/github/license/BrBriz/One-Click-Offer)](https://github.com/BrBriz/One-Click-Offer/blob/main/LICENSE)
+
 ### INFORMATION: THIS PROJECT BASED AND USING THIS PROJECT BY [Brom127](https://github.com/peleicht/backpack-offer-sender/) 
 
 This browser plugin adds a button to backpack.tf listings, which will instantly send your offer as specified by the listing.
