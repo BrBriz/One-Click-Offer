@@ -13,8 +13,9 @@ We use a **X.X.X.X.x** versioning system, where each number represents a specifi
 ## [1.5.1.2] - 2025-02-28
 ### Added 
 - Support GetTradeOffers (req.:const SteamAPI = "[API_KEY](https://steamcommunity.com/dev/apikey)";)
+- For example: If you already have offers for your things, the program will ignore them when sending an offer. The function only works if SteamAPI is not empty ("").
 ![Lines where need put API_KEY](/images/GetTradeOffers_Lines.png)
- For example: If you already have offers for your things, the program will ignore them when sending an offer. The function only works if SteamAPI is not empty ("").
+
 - Optimized browser logs
 
 ## [1.4.1.2.8] - 2025-01-21
