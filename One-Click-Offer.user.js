@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      1.4.1.2.8
+// @version      1.5.1.2
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz (Before 1.4.0 - Brom127)
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -21,6 +21,18 @@ const btn_color = "#931F1D";
 const next_btn_color = "#eb2335";
 const btn_text = "One Click Offer ⇄";
 const DEBUG = false;
+
+// Use it if want better offer sender. Fill SteamAPI -> https://steamcommunity.com/dev/apikey
+const SteamAPI = "";
+const GetTradeOffers = "https://api.steampowered.com/IEconService/GetTradeOffers/v1/";
+const GetTradeOffers_params = {
+    'key': SteamAPI,
+    'get_sent_offers': 1,
+    'get_received_offers': 1,
+    'get_descriptions': 1,
+    'active_only': 1,
+    'historical_only': 0 
+};
 
 let internal_request_sent = false;
 
@@ -369,7 +381,41 @@ async function main() {
         const items_to_receive = [];
 
         let [our_inventory, their_inventory] = await getInventories();
+
         window.our_inv = our_inventory;
+
+        const validTradeOfferStates = [2, 4, 9];
+        const taked_assetIds = [];
+        
+        if (SteamAPI !== ""){
+
+            try {
+                console.log(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params))
+                const GetTradeOffers_response = await fetch(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params));
+    
+                console.log('[SteamAPI/GetTradeOffers]: Response Status:', GetTradeOffers_response.status);
+    
+                if (!GetTradeOffers_response.ok) {
+                    throw new Error(`[SteamAPI/GetTradeOffers]: Network response was not ok. Status: ${GetTradeOffers_response.status}`);
+                }
+    
+                const GetTradeOffers_data = await GetTradeOffers_response.json();
+                console.log('[SteamAPI/GetTradeOffers]:  Response data:', GetTradeOffers_data);
+    
+                GetTradeOffers_data["response"]["trade_offers_sent"].forEach(offer => {
+                if (validTradeOfferStates.includes(offer.trade_offer_state)) {
+                    offer.items_to_give.forEach(item => {taked_assetIds.push(item.assetid);});
+                    }   
+                });
+
+                console.log("[SteamAPI/GetTradeOffers]: taked_assetIds: ")
+                console.log(taked_assetIds);
+            } catch (error) {
+                console.error('[SteamAPI/GetTradeOffers]: Error fetching trade offers: ', error);
+            };
+    }
+        const our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
+        
         window.their_inv = their_inventory;
 
         if (!params.has("tscript_id")) {
@@ -378,13 +424,13 @@ async function main() {
             console.log("[Sell item]: needed_item_name: " + needed_item_name)
             if (document.referrer === "https://next.backpack.tf/") {
                 // next backpack uses different item names (e.g. "The" is removed)
-                our_inventory = our_inventory.map(item => ({ ...item, name: normalizeName(item.name) }));
+                our_filtered_inventory = our_filtered_inventory.map(item => ({ ...item, name: normalizeName(item.name) }));
             }
             console.log("[Sell item]: My inventory: ")
-            console.log(our_inventory)
+            console.log(our_filtered_inventory)
             console.log("[Sell item]: Their inventory: " )
             console.log(their_inventory)
-            const needed_item = our_inventory.find(i => i.name === needed_item_name);
+            const needed_item = our_filtered_inventory.find(i => i.name === needed_item_name);
             console.log("[Sell item]: needed_item: " + needed_item)
             if (!needed_item) return throwError("Could not find item in your inventory.");
 
@@ -395,7 +441,7 @@ async function main() {
             const currencies = toCurrencyTypes(currency_string);
             const [their_currency, change] = pickCurrency(their_inventory, ...currencies);
             if (change.find(c => c !== 0)) {
-                const [our_currency, change2] = pickCurrency(our_inventory, 0, ...change);
+                const [our_currency, change2] = pickCurrency(our_filtered_inventory, 0, ...change);
                 if (change2.find(c => c !== 0)) return throwError("Could not balance currencies.");
                 for (let c of our_currency) items_to_give.push(toTradeOfferItem(c.id));
             }
@@ -407,10 +453,10 @@ async function main() {
             let needed_item = their_inventory.find(i => i.id === item_id);
             if (!needed_item) {
                 const needed_item_name = params.get("tscript_name").replace("u0023", "#"); //get other instance of same item if item with exact id already sold
-                needed_item = our_inventory.find(i => i.name === needed_item_name);
+                needed_item = our_filtered_inventory.find(i => i.name === needed_item_name);
             }
             console.log("[Sell item]: My inventory: ")
-            console.log(our_inventory)
+            console.log(our_filtered_inventory)
             console.log("[Sell item]: Their inventory: " )
             console.log(their_inventory)
             if (!needed_item) return throwError("Item has already been sold.");
@@ -420,19 +466,24 @@ async function main() {
             //get your currencies
             const currency_string = params.get("tscript_price");
             const currencies = toCurrencyTypes(currency_string);
-            const [our_currency, change] = pickCurrency(our_inventory, ...currencies);
+            const [our_currency, change] = pickCurrency(our_filtered_inventory, ...currencies);
             if (change.find(c => c !== 0)) {
                 const [their_currency, change2] = pickCurrency(their_inventory, 0, ...change);
-                console.log("change 2 " + change2);
+                console.log("[Post_pickCurrency]: change 2 " + change2);
                 if (change2.find(c => c !== 0)) return throwError("Could not balance currencies");
                 for (let c of their_currency) items_to_receive.push(toTradeOfferItem(c.id));
             }
-            console.log(our_currency + " " + change);
+            console.log("[Post_pickCurrency]: our_currency: ");
+            console.log(our_currency);
+
+            console.log("[Post_pickCurrency]: change: ");
+            console.log(change);
+
             for (let c of our_currency) items_to_give.push(toTradeOfferItem(c.id));
         }
 
         const offer_id = await sendOffer(items_to_give, items_to_receive);
-        if (offer_id) console.log("success")
+        if (offer_id) console.log("[One-Click-Offer/Final]: Success")
         if (offer_id && !DEBUG) window.close(); //success
     }
     /**
@@ -722,7 +773,6 @@ function toCurrencyTypes(currency_string) {
         half_scrap = 0;
     }
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
-    // if (small_metal !== 0 && String(small_metal)[0] !== String(small_metal)[1]) return throwError("Invalid currency " + currency_string);
 
     return [keys, ref, rec, scrap, half_scrap];
 }
@@ -732,12 +782,19 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
     const inv_ref = inventory.filter(item => item.name === "Refined Metal");
     const inv_rec = inventory.filter(item => item.name === "Reclaimed Metal");
     const inv_scrap = inventory.filter(item => item.name === "Scrap Metal");
+
     if (DEBUG) {
-        inventory.forEach(item => {
+        const logData = inventory.map(item => {
             const found = itemsWithPriceHalfScrap.includes(item.name);
-            console.log(`${found ? '✅' : '❌'} Checking: ${item.name}`);
-         });
-    }
+            return {
+                Name: item.name,
+                Found: found ? '✅' : '❌'
+            };
+        });
+        console.log("[pickCurrency]: itemsWithPriceHalfScrap:")
+        console.log(logData);
+    };
+
     const inv_half_scrap = inventory.filter(item => itemsWithPriceHalfScrap.includes(item.name));
     console.log("[pickCurrency]: Inventory:")
     console.log(inventory)
@@ -838,8 +895,6 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
     const take_ref = inv_ref.slice(ref_start, ref_start + ref);
     const take_rec = inv_rec.slice(rec_start, rec_start + rec);
     const take_scrap = inv_scrap.slice(scrap_start, scrap_start + scrap);
-    console.log("[pickCurrency]: half_scrap_start:  " + half_scrap_start)
-    console.log("[pickCurrency]: half_scrap:  " + half_scrap)
     const take_half_scrap = inv_half_scrap.slice(half_scrap_start, half_scrap_start + half_scrap);
     console.log("[pickCurrency]: take_keys: " + take_keys.length);
     console.log("[pickCurrency]: take_ref: " + take_ref.length);
