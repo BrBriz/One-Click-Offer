@@ -10,6 +10,11 @@ We use a **X.X.X.X.x** versioning system, where each number represents a specifi
 - **Fourth X (Fixes & Patches)** – The last number of the bug that was fixed ([Issue](https://github.com/BrBriz/One-Click-Offer/issues)).  
 - **Fifth x (Bad Fix)** - Possible under a problem fix version
 
+## [1.6.1.2] - 2025-03-06
+### Added
+- Use half-scrap items if not enough scrap metal in trade offers.
+- Better debug in console(alert)
+
 ## [1.5.1.2] - 2025-02-28
 ### Added 
 - Support GetTradeOffers (req. : const SteamAPI = "[API_KEY](https://steamcommunity.com/dev/apikey)";)

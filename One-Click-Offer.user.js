@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      1.5.1.2
+// @version      1.6.1.2
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz (Before 1.4.0 - Brom127)
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -31,7 +31,7 @@ const GetTradeOffers_params = {
     'get_received_offers': 1,
     'get_descriptions': 1,
     'active_only': 1,
-    'historical_only': 0 
+    'historical_only': 0
 };
 
 let internal_request_sent = false;
@@ -386,26 +386,26 @@ async function main() {
 
         const validTradeOfferStates = [2, 4, 9];
         const taked_assetIds = [];
-        
+
         if (SteamAPI !== ""){
 
             try {
                 console.log(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params))
                 const GetTradeOffers_response = await fetch(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params));
-    
+
                 console.log('[SteamAPI/GetTradeOffers]: Response Status:', GetTradeOffers_response.status);
-    
+
                 if (!GetTradeOffers_response.ok) {
                     throw new Error(`[SteamAPI/GetTradeOffers]: Network response was not ok. Status: ${GetTradeOffers_response.status}`);
                 }
-    
+
                 const GetTradeOffers_data = await GetTradeOffers_response.json();
                 console.log('[SteamAPI/GetTradeOffers]:  Response data:', GetTradeOffers_data);
     
                 GetTradeOffers_data["response"]["trade_offers_sent"].forEach(offer => {
                 if (validTradeOfferStates.includes(offer.trade_offer_state)) {
                     offer.items_to_give.forEach(item => {taked_assetIds.push(item.assetid);});
-                    }   
+                    }
                 });
 
                 console.log("[SteamAPI/GetTradeOffers]: taked_assetIds: ")
@@ -415,7 +415,7 @@ async function main() {
             };
     }
         const our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
-        
+
         window.their_inv = their_inventory;
 
         if (!params.has("tscript_id")) {
@@ -432,7 +432,7 @@ async function main() {
             console.log(their_inventory)
             const needed_item = our_filtered_inventory.find(i => i.name === needed_item_name);
             console.log("[Sell item]: needed_item: " + needed_item)
-            if (!needed_item) return throwError("Could not find item in your inventory.");
+            if (!needed_item) return throwError("[Sell item]: Could not find item in your inventory.");
 
             items_to_give.push(toTradeOfferItem(needed_item.id));
 
@@ -442,7 +442,7 @@ async function main() {
             const [their_currency, change] = pickCurrency(their_inventory, ...currencies);
             if (change.find(c => c !== 0)) {
                 const [our_currency, change2] = pickCurrency(our_filtered_inventory, 0, ...change);
-                if (change2.find(c => c !== 0)) return throwError("Could not balance currencies.");
+                if (change2.find(c => c !== 0)) return throwError("[Sell item]: Could not balance currencies.");
                 for (let c of our_currency) items_to_give.push(toTradeOfferItem(c.id));
             }
 
@@ -459,7 +459,7 @@ async function main() {
             console.log(our_filtered_inventory)
             console.log("[Sell item]: Their inventory: " )
             console.log(their_inventory)
-            if (!needed_item) return throwError("Item has already been sold.");
+            if (!needed_item) return throwError("[Sell item]: Item has already been sold.");
 
             items_to_receive.push(toTradeOfferItem(needed_item.id));
 
@@ -470,7 +470,7 @@ async function main() {
             if (change.find(c => c !== 0)) {
                 const [their_currency, change2] = pickCurrency(their_inventory, 0, ...change);
                 console.log("[Post_pickCurrency]: change 2 " + change2);
-                if (change2.find(c => c !== 0)) return throwError("Could not balance currencies");
+                if (change2.find(c => c !== 0)) return throwError("[Sell item]: Could not balance currencies");
                 for (let c of their_currency) items_to_receive.push(toTradeOfferItem(c.id));
             }
             console.log("[Post_pickCurrency]: our_currency: ");
@@ -514,7 +514,7 @@ function getInventories() {
 
         let done = false;
         setTimeout(() => {
-            if (!done) throwError("Timeout waiting for inventory data.");
+            if (!done) throwError("[getInventories]: Timeout waiting for inventory data.");
         }, 15000);
 
         const inventories = await Promise.all([getSingleInventory(UserYou), getSingleInventory(UserThem)]);
@@ -565,7 +565,7 @@ function getInventories() {
                 const on_fail = User.OnInventoryLoadFailed;
                 User.OnInventoryLoadFailed = async function (data, appid, contextid) {
                     if (appid === 440 && contextid === 2) {
-                        console.log("load failed, requesting manually");
+                        console.log("[waitForInventoryLoad]: load failed, requesting manually");
                         const inv = await getInventory(User.strSteamId);
                         done = true;
                         res(inv);
@@ -595,18 +595,20 @@ function getInventories() {
     let body;
     try {
         const response = await fetch("https://steamcommunity.com/inventory/" + steam_id + "/440/2?count=2000&l=english");
-        if (!response.ok) throwError("response status error: " + response.status);
+
+        if (!response.ok) throwError("[getInventory]: response status error: " + response.status);
         body = await response.json();
         if (body.more_items) {
             const more_response = await fetch("https://steamcommunity.com/inventory/" + steam_id + "/440/2?count=1000&more_start=1000&l=english");
-            if (!more_response.ok) throwError("more_response status error: " + more_response.status);
+
+            if (!more_response.ok) throwError("[getInventory]: more_response status error: " + more_response.status);
             const more_body = await more_response.json();
 
             body.assets = body.assets.concat(more_body.assets);
             body.descriptions = body.descriptions.concat(more_body.descriptions);
         }
     } catch (err) {
-        return throwError("Could not obtain inventory data: " + err);
+        return throwError("[getInventory]: Could not obtain inventory data: " + err);
     }
 
     const quickDescriptionLookup = {};
@@ -675,7 +677,7 @@ function getInventories() {
             })
         ).json();
 
-        if (response_body.strError) return throwError(response_body.strError);
+        if (response_body.strError) return throwError("[sendOffer]: " + response_body.strError);
 
         return response_body.tradeofferid;
     } catch {}
@@ -743,7 +745,7 @@ function toTradeOfferItem(id) {
 }
 function toCurrencyTypes(currency_string) {
     const match = currency_string.match(/^(\d+ keys?,? ?)?(\d+(?:\.\d+)? ref)?$/);
-    if (!match) return throwError("Could not parse currency " + currency_string);
+    if (!match) return throwError("[toCurrencyTypes]: Could not parse currency " + currency_string);
 
     let keys = 0;
     let metal = 0;
@@ -801,9 +803,9 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
     console.log("[pickCurrency]: Inv_half_scrap:")
     console.log(inv_half_scrap)
     console.log("[pickCurrency]: Half_scrap in the start: " + half_scrap);
-    if (inv_keys.length < keys) return throwError("Insufficient Keys");
-    if (allow_change && inv_ref.length + inv_rec.length / 3 + inv_scrap.length / 9 + inv_half_scrap.length / 20 < ref + rec / 3 + scrap / 9 + half_scrap / 20) return throwError("Insufficient Metal");
-    if (!allow_change && (inv_ref.length < ref || inv_rec.length < rec || inv_scrap.length < scrap || inv_half_scrap.length < half_scrap)) return throwError("Insufficient Metal");
+    if (inv_keys.length < keys) return throwError("[pickCurrency]: Insufficient Keys");
+    if (allow_change && inv_ref.length + inv_rec.length / 3 + inv_scrap.length / 9 + inv_half_scrap.length / 20 < ref + rec / 3 + scrap / 9 + half_scrap / 20) return throwError("[pickCurrency]: Insufficient Metal");
+    if (!allow_change && (inv_ref.length < ref || inv_rec.length < rec || inv_scrap.length < scrap || inv_half_scrap.length < half_scrap)) return throwError("[pickCurrency]: Insufficient Metal");
 
     let leftover_ref = inv_ref.length - ref;
     let leftover_rec = inv_rec.length - rec;
@@ -847,12 +849,21 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
 
     //use scrap if not enough rec
     if (leftover_rec < 0) {
-        if (leftover_scrap < -leftover_rec * 3) return throwError("Insufficient Metal");
 
         rec -= -leftover_rec;
         scrap += -leftover_rec * 3;
         leftover_scrap -= -leftover_rec * 3;
         leftover_rec = 0;
+    }
+
+    //use half_scrap if not enough scrap
+    if (leftover_scrap < 0) {
+        if (leftover_half_scrap < -leftover_scrap * 2) return throwError("[pickCurrency]: Insufficient Metal");
+
+        scrap -= leftover_scrap;
+        half_scrap += -leftover_scrap * 2;
+        leftover_half_scrap -= -leftover_scrap * 2;
+        leftover_scrap = 0;
     }
 
     //calculate change needed from other inventory
@@ -978,7 +989,7 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
                 JSON.stringify(items, undefined, 4),
             ].join("\n")
         );
-        return throwError("Could not balance currencies");
+        return throwError("[pickCurrency]: Could not balance currencies");
     }
 
     return [items, [change.ref, change.rec, change.scrap, change.half_scrap]];
