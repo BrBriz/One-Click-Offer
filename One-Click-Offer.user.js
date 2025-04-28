@@ -2,9 +2,9 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      1.6.1.2
+// @version      2.0.0
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
-// @author       BrBriz (Before 1.4.0 - Brom127)
+// @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
 // @downloadURL  https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
 // @match        *://backpack.tf/stats/*
@@ -189,60 +189,90 @@ async function main() {
 
     if (location.hostname === "backpack.tf" && location.pathname.match(/\/(stats|classifieds|u)/)) {
         await awaitDocumentReady();
-
-        //add new button with item and price info in url query
+    
         const list_elements = document.getElementsByClassName("media-list");
         let order_elements = [];
-        for (let elements of list_elements) {
+        for (const elements of list_elements) {
             const buy_sell_listings = Array.from(elements.getElementsByTagName("li"));
             order_elements = order_elements.concat(buy_sell_listings);
         }
-
-        for (let order of order_elements) {
-            //get item info
-            const header = document.querySelector("#" + order.id + " > div.listing-body > div.listing-header > div.listing-title > h5");
-            const item_name = header.firstChild.textContent
-                .trim()
-                .replace("\n", " ")
-                .replace(/ #\d+$/, ""); //\n and # dont work in urls
-
-            const info = document.querySelector("#" + order.id + " > div.listing-item > div");
-            const price = info.getAttribute("data-listing_price");
-
-            //ignore specific buy orders
+    
+        for (const order of order_elements) {
+            const header = document.querySelector(`#${order.id} > div.listing-body > div.listing-header > div.listing-title > h5`);
+            if (!header) continue;
+    
+            const item_name = header.firstChild.textContent.trim().replace("\n", " ").replace(/ #\d+$/, "");
+            const info = document.querySelector(`#${order.id} > div.listing-item > div`);
+            const price = info?.getAttribute("data-listing_price");
+            if (!price) continue;
+    
             let item_id_text = "";
             if (info.getAttribute("data-listing_intent") === "buy") {
-                if (
-                    item_name.includes("Unusual") &&
-                    !item_name.includes("Haunted Metal Scrap") &&
-                    !item_name.includes("Horseless Headless Horsemann's Headtaker")
-                ) {
-                    continue; //ignore generic unusual buy orders
+                if (item_name.includes("Unusual") && !item_name.includes("Haunted Metal Scrap") && !item_name.includes("Horseless Headless Horsemann's Headtaker")) {
+                    continue;
                 }
-
                 const attributes = ["data-spell_1", "data-part_name_1", "data-killstreaker", "data-sheen", "data-level", "data-paint_name"];
                 let modified = false;
-                for (let a of attributes) {
-                    if (info.hasAttribute(a)) {
-                        if (a === "data-paint_name" && item_name.includes(info.getAttribute("data-paint_name"))) continue; //don't ignore paint cans (they're always painted)
+                for (const attr of attributes) {
+                    if (info.hasAttribute(attr)) {
+                        if (attr === "data-paint_name" && item_name.includes(info.getAttribute("data-paint_name"))) continue;
                         modified = true;
                         break;
                     }
                 }
-                if (modified) continue; //ignore modified buy orders
+                if (modified) continue;
             } else {
-                item_id_text = "&tscript_id=" + info.getAttribute("data-id");
+                item_id_text = `&tscript_id=${info.getAttribute("data-id")}`;
             }
+    
+            const btn_selector = `#${order.id} > div.listing-body > div.listing-header > div.listing-buttons > a.btn.btn-bottom.btn-xs.btn-`;
+            let send_offer_btn = document.querySelector(btn_selector + "success")
+                || document.querySelector(btn_selector + "primary");
+    
+            if (!send_offer_btn || send_offer_btn.getAttribute("href").startsWith("steam://")) continue;
+    
+            const listingBody = document.querySelector(`#${order.id} > div.listing-body`);
+            if (listingBody) {
+                listingBody.style.width = "90%";
+            }
+    
+            const quantityInput = document.createElement("input");
+            quantityInput.type = "number";
+            quantityInput.value = "1";
+            quantityInput.min = "1";
+            quantityInput.style.borderRadius = ".5em .5em 0 0";
+            quantityInput.style.fontSize = "12px";
+            quantityInput.style.lineHeight = "18px";
+            quantityInput.style.padding = "1px 5px";
+            quantityInput.style.width = "40px";
+            quantityInput.style.marginBottom = "2px";
+            quantityInput.style.border = "2px solid rgba(151, 143, 143, 0.5)";
+            quantityInput.style.marginLeft = "5px";
+            quantityInput.style.verticalAlign = "middle";
+            
+            quantityInput.addEventListener('input', () => {
+                const length = quantityInput.value.length;
+                quantityInput.style.width = `${35 + 6 * length}px`;
+            });
 
-            const btn_selector = "#" + order.id + " > div.listing-body > div.listing-header > div.listing-buttons > a.btn.btn-bottom.btn-xs.btn-";
-            let send_offer_btn = document.querySelector(btn_selector + "success");
-            if (!send_offer_btn) send_offer_btn = document.querySelector(btn_selector + "primary"); //button is blue (negotiable listing)
-            if (!send_offer_btn || send_offer_btn.getAttribute("href").startsWith("steam://")) continue; //no tradeoffer button, stop
-
-            //add new button
             const btn_clone = send_offer_btn.cloneNode(true);
-            const url = encodeURI(btn_clone.getAttribute("href") + item_id_text + "&tscript_price=" + price + "&tscript_name=" + item_name);
-            btn_clone.setAttribute("href", url);
+    
+            const updateHref = () => {
+                const count = quantityInput.value;
+                const url = new URL(btn_clone.getAttribute("href"));
+                if (item_id_text !== "") {
+                    url.searchParams.set('tscript_id', item_id_text.replace(/&tscript_id=/, ""));
+                }
+                url.searchParams.set('tscript_price', price);
+                url.searchParams.set('tscript_name', item_name);
+                url.searchParams.set('tscript_count', count);
+            
+                btn_clone.setAttribute("href", url.toString());
+            };
+    
+            updateHref();
+            quantityInput.addEventListener("input", updateHref);
+    
             btn_clone.style.backgroundColor = btn_color;
             btn_clone.style.borderColor = btn_color;
             if (!btn_text) {
@@ -251,8 +281,12 @@ async function main() {
             } else {
                 btn_clone.setAttribute("title", btn_text);
             }
-
-            document.querySelector("#" + order.id + " > div.listing-body > div.listing-header > div.listing-buttons").append(btn_clone);
+    
+            const listingButtons = document.querySelector(`#${order.id} > div.listing-body > div.listing-header > div.listing-buttons`);
+            if (listingButtons) {
+                listingButtons.appendChild(btn_clone);
+                listingButtons.appendChild(quantityInput);
+            }
         }
     } else if (location.hostname === "next.backpack.tf") {
         //next does not refresh page between pages, so script needs to run on any next page
@@ -373,118 +407,177 @@ async function main() {
     } else if (location.hostname === "steamcommunity.com" && location.pathname.startsWith("/tradeoffer/new")) {
         const params = new URLSearchParams(location.search);
         if (!params.has("tscript_price")) return;
-
+    
         interceptInventoryRequest();
         await awaitDocumentReady();
-
-        const items_to_give = [];
-        const items_to_receive = [];
-
+    
+        let items_to_give = [];
+        let items_to_receive = [];
+    
         let [our_inventory, their_inventory] = await getInventories();
-
         window.our_inv = our_inventory;
-
+        window.their_inv = their_inventory;
+    
         const validTradeOfferStates = [2, 4, 9];
         const taked_assetIds = [];
-
-        if (SteamAPI !== ""){
-
+ 
+        if (SteamAPI !== "") {
             try {
-                console.log(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params))
-                const GetTradeOffers_response = await fetch(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params));
-
-                console.log('[SteamAPI/GetTradeOffers]: Response Status:', GetTradeOffers_response.status);
-
-                if (!GetTradeOffers_response.ok) {
-                    throw new Error(`[SteamAPI/GetTradeOffers]: Network response was not ok. Status: ${GetTradeOffers_response.status}`);
-                }
-
-                const GetTradeOffers_data = await GetTradeOffers_response.json();
-                console.log('[SteamAPI/GetTradeOffers]:  Response data:', GetTradeOffers_data);
+                const response = await fetch(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params));
+                console.log('[SteamAPI/GetTradeOffers]: Response Status:', response.status);
     
-                GetTradeOffers_data["response"]["trade_offers_sent"].forEach(offer => {
-                if (validTradeOfferStates.includes(offer.trade_offer_state)) {
-                    offer.items_to_give.forEach(item => {taked_assetIds.push(item.assetid);});
+                if (!response.ok) throw new Error(`[SteamAPI/GetTradeOffers]: Status ${response.status}`);
+    
+                const data = await response.json();
+                data.response.trade_offers_sent?.forEach(offer => {
+                    if (validTradeOfferStates.includes(offer.trade_offer_state)) {
+                        offer.items_to_give.forEach(item => taked_assetIds.push(item.assetid));
                     }
                 });
-
-                console.log("[SteamAPI/GetTradeOffers]: taked_assetIds: ")
-                console.log(taked_assetIds);
+                console.log("[SteamAPI/GetTradeOffers]: taked_assetIds:", taked_assetIds);
             } catch (error) {
-                console.error('[SteamAPI/GetTradeOffers]: Error fetching trade offers: ', error);
-            };
-    }
-        const our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
-
-        window.their_inv = their_inventory;
-
-        if (!params.has("tscript_id")) {
-            //sell your item
-            const needed_item_name = params.get("tscript_name").replace("u0023", "#");
-            console.log("[Sell item]: needed_item_name: " + needed_item_name)
-            if (document.referrer === "https://next.backpack.tf/") {
-                // next backpack uses different item names (e.g. "The" is removed)
-                our_filtered_inventory = our_filtered_inventory.map(item => ({ ...item, name: normalizeName(item.name) }));
+                console.error('[SteamAPI/GetTradeOffers]: Error:', error);
             }
-            console.log("[Sell item]: My inventory: ")
-            console.log(our_filtered_inventory)
-            console.log("[Sell item]: Their inventory: " )
-            console.log(their_inventory)
-            const needed_item = our_filtered_inventory.find(i => i.name === needed_item_name);
-            console.log("[Sell item]: needed_item: " + needed_item)
-            if (!needed_item) return throwError("[Sell item]: Could not find item in your inventory.");
-
-            items_to_give.push(toTradeOfferItem(needed_item.id));
-
-            //get partner currencies
-            const currency_string = params.get("tscript_price");
-            const currencies = toCurrencyTypes(currency_string);
-            const [their_currency, change] = pickCurrency(their_inventory, ...currencies);
-            if (change.find(c => c !== 0)) {
-                const [our_currency, change2] = pickCurrency(our_filtered_inventory, 0, ...change);
-                if (change2.find(c => c !== 0)) return throwError("[Sell item]: Could not balance currencies.");
-                for (let c of our_currency) items_to_give.push(toTradeOfferItem(c.id));
-            }
-
-            for (let c of their_currency) items_to_receive.push(toTradeOfferItem(c.id));
-        } else {
-            //buy partners item
-            const item_id = params.get("tscript_id");
-            let needed_item = their_inventory.find(i => i.id === item_id);
-            if (!needed_item) {
-                const needed_item_name = params.get("tscript_name").replace("u0023", "#"); //get other instance of same item if item with exact id already sold
-                needed_item = our_filtered_inventory.find(i => i.name === needed_item_name);
-            }
-            console.log("[Sell item]: My inventory: ")
-            console.log(our_filtered_inventory)
-            console.log("[Sell item]: Their inventory: " )
-            console.log(their_inventory)
-            if (!needed_item) return throwError("[Sell item]: Item has already been sold.");
-
-            items_to_receive.push(toTradeOfferItem(needed_item.id));
-
-            //get your currencies
-            const currency_string = params.get("tscript_price");
-            const currencies = toCurrencyTypes(currency_string);
-            const [our_currency, change] = pickCurrency(our_filtered_inventory, ...currencies);
-            if (change.find(c => c !== 0)) {
-                const [their_currency, change2] = pickCurrency(their_inventory, 0, ...change);
-                console.log("[Post_pickCurrency]: change 2 " + change2);
-                if (change2.find(c => c !== 0)) return throwError("[Sell item]: Could not balance currencies");
-                for (let c of their_currency) items_to_receive.push(toTradeOfferItem(c.id));
-            }
-            console.log("[Post_pickCurrency]: our_currency: ");
-            console.log(our_currency);
-
-            console.log("[Post_pickCurrency]: change: ");
-            console.log(change);
-
-            for (let c of our_currency) items_to_give.push(toTradeOfferItem(c.id));
         }
+    
+        let our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
+    
+        if (!params.has("tscript_id")) {
+            const needed_item_name = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
+            const requested_count = parseInt(params.get("tscript_count") || "1", 10);
+            const currency_string = params.get("tscript_price");
+            console.log("[Buy Order]: needed_item_name:", needed_item_name);
 
+            const needed_items = [];
+            
+            if (document.referrer === "https://next.backpack.tf/") {
+                our_filtered_inventory = our_filtered_inventory.map(item => ({
+                    ...item,
+                    name: normalizeName(item.name)
+                }));
+            }
+
+            console.log(our_filtered_inventory);
+
+            const items_by_name = our_filtered_inventory.filter(item => item.name === needed_item_name);
+            console.log(items_by_name);
+            for (let i = 0; i < requested_count; i++) {
+                if (i < items_by_name.length) {
+                    needed_items.push(items_by_name[i]);
+                }
+            }
+
+            if (!needed_items) return throwError("[Buy Order]: Could not find item in your inventory.");
+            
+            let actual_count = needed_items.length;
+            console.log(`[Buy Order]: Requested ${requested_count}, Found ${actual_count}`);
+
+            while (actual_count >= 1) {
+                console.log(`[Buy Order]: Trying to buy ${actual_count} items`);
+                const temp_items_to_give = [];
+                for (const item of needed_items) {
+                    temp_items_to_give.push(toTradeOfferItem(item.id));
+                }
+
+                const currencies = toCurrencyTypes(currency_string, actual_count);
+                const [their_currency, change] = pickCurrency(their_inventory, ...currencies);
+
+                if (change.find(c => c !== 0)) {
+                    const [our_currency, change2] = pickCurrency(our_filtered_inventory, 0, ...change);
+                    if (change2.find(c => c !== 0)) {
+                        actual_count--;
+                        // Remove one item to try new balance
+                        for (let i = 0; i < needed_items.length; i++) {
+                            if (needed_items[i].id !== item_id) {
+                                needed_items.splice(i, 1);
+                                break; 
+                            }
+                        }
+                        continue;
+                    }
+                    for (const c of our_currency) temp_items_to_give.push(toTradeOfferItem(c.id));
+                }
+                console.log(`[Buy Order]: Actual count balanced items: ${actual_count}`);
+                items_to_give = temp_items_to_give;
+                for (const c of their_currency) items_to_receive.push(toTradeOfferItem(c.id));
+                break;
+            }
+
+            if (actual_count === 0) return throwError("[Buy Order]: Could not balance currencies.");
+
+        } else {
+            const item_id = params.get("tscript_id");
+            const item_name = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
+            const currency_string = params.get("tscript_price");
+            const requested_count = parseInt(params.get("tscript_count") || "1", 10);
+    
+            const needed_items = [];
+
+            const item_by_id = their_inventory.find(item => item.id === item_id);
+            if (item_by_id) needed_items.push(item_by_id);
+
+            console.log("[Sell Order]: ", item_name, their_inventory.filter(item => item.name));
+            const items_by_name = their_inventory.filter(item => item.name === item_name && item.id !== item_id);
+            for (let i = 0; i < requested_count - 1; i++) {
+                if (i < items_by_name.length) {
+                    needed_items.push(items_by_name[i]);
+                }
+            }
+
+            if (!needed_items) return throwError("[Sell Order]: Item(-s) has already been sold.");
+
+            let actual_count = needed_items.length;
+            console.log(`[Sell Order]: Requested ${requested_count}, Found ${actual_count}`);
+
+            while (actual_count >= 1) {
+                console.log(`[Sell Order]: Trying to buy ${actual_count} items`);
+            
+                const temp_items_to_receive = [];
+                for (const item of needed_items) {
+                    temp_items_to_receive.push(toTradeOfferItem(item.id));
+                }
+                
+                console.log("[Sell Order]: Items to receive: ", temp_items_to_receive);
+
+                const total_price = toCurrencyTypes(decodeURIComponent(decodeURIComponent(currency_string)), actual_count);
+                console.log("[Sell Order]: Total price: ", total_price);
+
+                console.log(`[Sell Order]: Total price for ${actual_count} items: ${total_price}`);
+            
+                const [our_currency, change] = pickCurrency(our_filtered_inventory, ...total_price);
+                
+                if (change.find(c => c !== 0)) {
+                    const [their_currency, change2] = pickCurrency(their_inventory, 0, ...change);
+                    console.log("[Post_pickCurrency]: change 2 " + change2);
+                    if (change2.find(c => c !== 0)) {
+                        actual_count--;
+                        // Remove one item to try new balance
+                        for (let i = 0; i < needed_items.length; i++) {
+                            if (needed_items[i].id !== item_id) {
+                                needed_items.splice(i, 1);
+                                break; 
+                            }
+                        }
+                        continue;
+                    }
+                    for (let c of their_currency) temp_items_to_receive.push(toTradeOfferItem(c.id));
+                }
+                console.log(`[Sell Order]: Actual count balanced items: ${actual_count}`);
+                items_to_receive = temp_items_to_receive;
+
+                for (const currency_item of our_currency) {
+                    items_to_give.push(toTradeOfferItem(currency_item.id));
+                }
+                break;
+            }
+
+            if (actual_count === 0) return throwError("[Sell Order]: Could not balance currencies.");
+
+        }
+    
         const offer_id = await sendOffer(items_to_give, items_to_receive);
-        if (offer_id) console.log("[One-Click-Offer/Final]: Success")
-        if (offer_id && !DEBUG) window.close(); //success
+        if (offer_id) console.log("[One-Click-Offer/Final]: Success");
+        if (offer_id && !DEBUG) window.close();
     }
     /**
      * @typedef {Object} UserYou
@@ -743,7 +836,7 @@ function toTradeOfferItem(id) {
         assetid: id,
     };
 }
-function toCurrencyTypes(currency_string) {
+function toCurrencyTypes(currency_string, count) {
     const match = currency_string.match(/^(\d+ keys?,? ?)?(\d+(?:\.\d+)? ref)?$/);
     if (!match) return throwError("[toCurrencyTypes]: Could not parse currency " + currency_string);
 
@@ -757,7 +850,7 @@ function toCurrencyTypes(currency_string) {
         const ref_length = match[2].indexOf(" ");
         metal = Number(match[2].slice(0, ref_length));
     }
-
+    metal = metal * count
     const ref = Math.floor(metal);
     const small_metal = Math.round((metal % 1) * 100);
     console.log("[toCurrencyTypes]: small_metal: ", small_metal);
@@ -775,7 +868,7 @@ function toCurrencyTypes(currency_string) {
         half_scrap = 0;
     }
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
-
+    keys = keys * count;
     return [keys, ref, rec, scrap, half_scrap];
 }
 
@@ -989,7 +1082,7 @@ function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
                 JSON.stringify(items, undefined, 4),
             ].join("\n")
         );
-        return throwError("[pickCurrency]: Could not balance currencies");
+        return [[-1, -1, -1, -1], [-1, -1, -1, -1]];
     }
 
     return [items, [change.ref, change.rec, change.scrap, change.half_scrap]];

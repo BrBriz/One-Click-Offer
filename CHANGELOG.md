@@ -2,13 +2,20 @@
 
 # Versioning Scheme
 
-We use a **X.X.X.X.x** versioning system, where each number represents a specific type of update:
+We use a **X.X.X.x** versioning system
 
-- **First X (Major)** – Major updates that significantly change the core functionality of the program.  
-- **Second X (Feature)** – New features or enhancements that add new functionality.  
-- **Third X (UI/UX)** – Changes in the user interface and design updates.  
-- **Fourth X (Fixes & Patches)** – The last number of the bug that was fixed ([Issue](https://github.com/BrBriz/One-Click-Offer/issues)).  
-- **Fifth x (Bad Fix)** - Possible under a problem fix version
+## Major [2.0.0] - 2025-04-27
+### Addded
+- Ability to choose the number of items you want to buy/sell (ONLY [Backpack.tf](https://backpack.tf/))
+
+ ![New sell/buy order ability](/images/NewSellOrderAbility.png)
+
+- Auto rebalancer: If your order was not balanced, the program will reduce your order by 1 item and try to balance it again until it is balanced.
+Ex.: The order was for 7 items, the program found only 5 in the seller/buyer's inventory, but was only able to balance on 3 items. The exchange offer will be created with only 3 items.
+
+- Fixed browser logs
+### Notice
+- next.backpack.tf will also receive an update with this feature, but later.
 
 ## [1.6.1.2] - 2025-03-06
 ### Added
