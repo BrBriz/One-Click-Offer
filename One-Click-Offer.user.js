@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.0
+// @version      2.0.1
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -497,7 +497,7 @@ async function main() {
                     }
                     for (const c of our_currency) temp_items_to_give.push(toTradeOfferItem(c.id));
                 }
-                console.log(`[Buy Order]: Actual count balanced items: ${actual_count}`);
+                console.warn(`[Buy Order]: Actual count balanced items: ${actual_count}`);
                 items_to_give = temp_items_to_give;
                 for (const c of their_currency) items_to_receive.push(toTradeOfferItem(c.id));
                 break;
@@ -562,7 +562,7 @@ async function main() {
                     }
                     for (let c of their_currency) temp_items_to_receive.push(toTradeOfferItem(c.id));
                 }
-                console.log(`[Sell Order]: Actual count balanced items: ${actual_count}`);
+                console.warn(`[Sell Order]: Actual count balanced items: ${actual_count}`);
                 items_to_receive = temp_items_to_receive;
 
                 for (const currency_item of our_currency) {
