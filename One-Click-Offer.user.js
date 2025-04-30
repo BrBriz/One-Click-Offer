@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.1
+// @version      2.0.2
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -488,10 +488,8 @@ async function main() {
                         actual_count--;
                         // Remove one item to try new balance
                         for (let i = 0; i < needed_items.length; i++) {
-                            if (needed_items[i].id !== item_id) {
-                                needed_items.splice(i, 1);
-                                break; 
-                            }
+                            needed_items.splice(i, 1);
+                            break; 
                         }
                         continue;
                     }
