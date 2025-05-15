@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.2
+// @version      2.0.3
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -189,23 +189,23 @@ async function main() {
 
     if (location.hostname === "backpack.tf" && location.pathname.match(/\/(stats|classifieds|u)/)) {
         await awaitDocumentReady();
-    
+
         const list_elements = document.getElementsByClassName("media-list");
         let order_elements = [];
         for (const elements of list_elements) {
             const buy_sell_listings = Array.from(elements.getElementsByTagName("li"));
             order_elements = order_elements.concat(buy_sell_listings);
         }
-    
+
         for (const order of order_elements) {
             const header = document.querySelector(`#${order.id} > div.listing-body > div.listing-header > div.listing-title > h5`);
             if (!header) continue;
-    
+
             const item_name = header.firstChild.textContent.trim().replace("\n", " ").replace(/ #\d+$/, "");
             const info = document.querySelector(`#${order.id} > div.listing-item > div`);
             const price = info?.getAttribute("data-listing_price");
             if (!price) continue;
-    
+
             let item_id_text = "";
             if (info.getAttribute("data-listing_intent") === "buy") {
                 if (item_name.includes("Unusual") && !item_name.includes("Haunted Metal Scrap") && !item_name.includes("Horseless Headless Horsemann's Headtaker")) {
@@ -224,18 +224,18 @@ async function main() {
             } else {
                 item_id_text = `&tscript_id=${info.getAttribute("data-id")}`;
             }
-    
+
             const btn_selector = `#${order.id} > div.listing-body > div.listing-header > div.listing-buttons > a.btn.btn-bottom.btn-xs.btn-`;
             let send_offer_btn = document.querySelector(btn_selector + "success")
                 || document.querySelector(btn_selector + "primary");
-    
+
             if (!send_offer_btn || send_offer_btn.getAttribute("href").startsWith("steam://")) continue;
-    
+
             const listingBody = document.querySelector(`#${order.id} > div.listing-body`);
             if (listingBody) {
                 listingBody.style.width = "90%";
             }
-    
+
             const quantityInput = document.createElement("input");
             quantityInput.type = "number";
             quantityInput.value = "1";
@@ -249,14 +249,14 @@ async function main() {
             quantityInput.style.border = "2px solid rgba(151, 143, 143, 0.5)";
             quantityInput.style.marginLeft = "5px";
             quantityInput.style.verticalAlign = "middle";
-            
+
             quantityInput.addEventListener('input', () => {
                 const length = quantityInput.value.length;
                 quantityInput.style.width = `${35 + 6 * length}px`;
             });
 
             const btn_clone = send_offer_btn.cloneNode(true);
-    
+
             const updateHref = () => {
                 const count = quantityInput.value;
                 const url = new URL(btn_clone.getAttribute("href"));
@@ -266,13 +266,13 @@ async function main() {
                 url.searchParams.set('tscript_price', price);
                 url.searchParams.set('tscript_name', item_name);
                 url.searchParams.set('tscript_count', count);
-            
+
                 btn_clone.setAttribute("href", url.toString());
             };
-    
+
             updateHref();
             quantityInput.addEventListener("input", updateHref);
-    
+
             btn_clone.style.backgroundColor = btn_color;
             btn_clone.style.borderColor = btn_color;
             if (!btn_text) {
@@ -281,7 +281,7 @@ async function main() {
             } else {
                 btn_clone.setAttribute("title", btn_text);
             }
-    
+
             const listingButtons = document.querySelector(`#${order.id} > div.listing-body > div.listing-header > div.listing-buttons`);
             if (listingButtons) {
                 listingButtons.appendChild(btn_clone);
@@ -391,43 +391,79 @@ async function main() {
                 if (!href || href.startsWith("steam://") || href.startsWith("https://marketplace.tf")) continue;
 
                 //add new button
+
+                const quantityInput = document.createElement("input");
+                quantityInput.type = "number";
+                quantityInput.value = "1";
+                quantityInput.min = "1";
+                quantityInput.style.borderRadius = ".5em .5em 0 0";
+                quantityInput.style.fontSize = "12px";
+                quantityInput.style.lineHeight = "18px";
+                quantityInput.style.padding = "1px 5px";
+                quantityInput.style.width = "40px";
+                quantityInput.style.marginBottom = "2px";
+                quantityInput.style.border = "2px solid rgba(151, 143, 143, 0.5)";
+                quantityInput.style.marginLeft = "5px";
+                quantityInput.style.verticalAlign = "middle";
+    
+                quantityInput.addEventListener('input', () => {
+                    const length = quantityInput.value.length;
+                    quantityInput.style.width = `${35 + 6 * length}px`;
+                });
+    
                 const btn_clone = send_offer_btn.cloneNode(true);
-                const url = encodeURI(href + item_id_text + "&tscript_price=" + price + "&tscript_name=" + item_name);
-                btn_clone.setAttribute("href", url);
+
                 btn_clone.id = "instant-button-" + i;
                 const icon = btn_clone.children[0];
                 icon.style.color = next_btn_color;
+
+                const updateHref = () => {
+                    const count = quantityInput.value;
+                    const url = new URL(btn_clone.getAttribute("href"));
+                    if (item_id_text !== "") {
+                        url.searchParams.set('tscript_id', item_id_text.replace(/&tscript_id=/, ""));
+                    }
+                    url.searchParams.set('tscript_price', price);
+                    url.searchParams.set('tscript_name', item_name);
+                    url.searchParams.set('tscript_count', count);
+    
+                    btn_clone.setAttribute("href", url.toString());
+                };
+
+                updateHref();
+                quantityInput.addEventListener("input", updateHref);
 
                 const existing_button = document.getElementById(btn_clone.id); //remove if another button exists already
                 if (existing_button) existing_button.remove();
 
                 btn_box.append(btn_clone);
+                btn_box.append(quantityInput);
             }
         }
     } else if (location.hostname === "steamcommunity.com" && location.pathname.startsWith("/tradeoffer/new")) {
         const params = new URLSearchParams(location.search);
         if (!params.has("tscript_price")) return;
-    
+
         interceptInventoryRequest();
         await awaitDocumentReady();
-    
+
         let items_to_give = [];
         let items_to_receive = [];
-    
+
         let [our_inventory, their_inventory] = await getInventories();
         window.our_inv = our_inventory;
         window.their_inv = their_inventory;
-    
+
         const validTradeOfferStates = [2, 4, 9];
         const taked_assetIds = [];
- 
+
         if (SteamAPI !== "") {
             try {
                 const response = await fetch(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params));
                 console.log('[SteamAPI/GetTradeOffers]: Response Status:', response.status);
-    
+
                 if (!response.ok) throw new Error(`[SteamAPI/GetTradeOffers]: Status ${response.status}`);
-    
+
                 const data = await response.json();
                 data.response.trade_offers_sent?.forEach(offer => {
                     if (validTradeOfferStates.includes(offer.trade_offer_state)) {
@@ -439,9 +475,9 @@ async function main() {
                 console.error('[SteamAPI/GetTradeOffers]: Error:', error);
             }
         }
-    
+
         let our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
-    
+
         if (!params.has("tscript_id")) {
             const needed_item_name = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
             const requested_count = parseInt(params.get("tscript_count") || "1", 10);
@@ -449,7 +485,7 @@ async function main() {
             console.log("[Buy Order]: needed_item_name:", needed_item_name);
 
             const needed_items = [];
-            
+
             if (document.referrer === "https://next.backpack.tf/") {
                 our_filtered_inventory = our_filtered_inventory.map(item => ({
                     ...item,
@@ -468,7 +504,7 @@ async function main() {
             }
 
             if (!needed_items) return throwError("[Buy Order]: Could not find item in your inventory.");
-            
+
             let actual_count = needed_items.length;
             console.log(`[Buy Order]: Requested ${requested_count}, Found ${actual_count}`);
 
@@ -489,7 +525,7 @@ async function main() {
                         // Remove one item to try new balance
                         for (let i = 0; i < needed_items.length; i++) {
                             needed_items.splice(i, 1);
-                            break; 
+                            break;
                         }
                         continue;
                     }
@@ -508,7 +544,7 @@ async function main() {
             const item_name = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
             const currency_string = params.get("tscript_price");
             const requested_count = parseInt(params.get("tscript_count") || "1", 10);
-    
+
             const needed_items = [];
 
             const item_by_id = their_inventory.find(item => item.id === item_id);
@@ -529,21 +565,21 @@ async function main() {
 
             while (actual_count >= 1) {
                 console.log(`[Sell Order]: Trying to buy ${actual_count} items`);
-            
+
                 const temp_items_to_receive = [];
                 for (const item of needed_items) {
                     temp_items_to_receive.push(toTradeOfferItem(item.id));
                 }
-                
+
                 console.log("[Sell Order]: Items to receive: ", temp_items_to_receive);
 
                 const total_price = toCurrencyTypes(decodeURIComponent(decodeURIComponent(currency_string)), actual_count);
                 console.log("[Sell Order]: Total price: ", total_price);
 
                 console.log(`[Sell Order]: Total price for ${actual_count} items: ${total_price}`);
-            
+
                 const [our_currency, change] = pickCurrency(our_filtered_inventory, ...total_price);
-                
+
                 if (change.find(c => c !== 0)) {
                     const [their_currency, change2] = pickCurrency(their_inventory, 0, ...change);
                     console.log("[Post_pickCurrency]: change 2 " + change2);
@@ -553,7 +589,7 @@ async function main() {
                         for (let i = 0; i < needed_items.length; i++) {
                             if (needed_items[i].id !== item_id) {
                                 needed_items.splice(i, 1);
-                                break; 
+                                break;
                             }
                         }
                         continue;
@@ -572,7 +608,7 @@ async function main() {
             if (actual_count === 0) return throwError("[Sell Order]: Could not balance currencies.");
 
         }
-    
+
         const offer_id = await sendOffer(items_to_give, items_to_receive);
         if (offer_id) console.log("[One-Click-Offer/Final]: Success");
         if (offer_id && !DEBUG) window.close();
@@ -853,18 +889,16 @@ function toCurrencyTypes(currency_string, count) {
     const small_metal = Math.round((metal % 1) * 100);
     console.log("[toCurrencyTypes]: small_metal: ", small_metal);
     const rec = Math.floor(small_metal / 33);
-    const scrap = Math.floor(small_metal / 11) % 3;
+    let scrap = Math.floor(small_metal / 11) % 3;
     console.log("[toCurrencyTypes]: Scrap: ", scrap);
     const small_small_metal = Math.round(((small_metal / 11) % 1) * 100);
     console.log("[toCurrencyTypes]: small_small_metal: ", small_small_metal);
-    let half_scrap;
+    let half_scrap = 0;
     if (small_small_metal >= 55 && small_small_metal < 100) {
-        half_scrap = 2;
+        scrap += 1;
     } else if (small_small_metal >= 9 && small_small_metal < 55) {
         half_scrap = 1;
-    } else {
-        half_scrap = 0;
-    }
+    };
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
     keys = keys * count;
     return [keys, ref, rec, scrap, half_scrap];

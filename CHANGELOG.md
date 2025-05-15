@@ -4,6 +4,13 @@
 
 We use a **X.X.X.x** versioning system
 
+## [2.0.3] - 2025-05-15
+### Added
+- Ability to choose the number of items you want to buy/sell to [next.backpack.tf](https://next.backpack.tf/))
+
+### Fixed
+- Take 1 scrap insted 2 half_scrap in toCurrencyTypes()
+
 ## Major [2.0.0] - 2025-04-27
 ### Addded
 - Ability to choose the number of items you want to buy/sell (ONLY [Backpack.tf](https://backpack.tf/))
