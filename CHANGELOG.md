@@ -4,6 +4,11 @@
 
 We use a **X.X.X.x** versioning system
 
+## [2.0.4] - 2025-05-16
+### Fixed
+- Added an additional rebalancer to avoid incorrect metal set
+- From now on www.backpack.tf the script also works
+
 ## [2.0.3] - 2025-05-15
 ### Added
 - Ability to choose the number of items you want to buy/sell to [next.backpack.tf](https://next.backpack.tf/))

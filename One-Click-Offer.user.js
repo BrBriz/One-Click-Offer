@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.3
+// @version      2.0.4
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -10,6 +10,9 @@
 // @match        *://backpack.tf/stats/*
 // @match        *://backpack.tf/classifieds*
 // @match        *://backpack.tf/u/*
+// @match        *://www.backpack.tf/stats/*
+// @match        *://www.backpack.tf/classifieds*
+// @match        *://www.backpack.tf/u/*
 // @match        *://next.backpack.tf/*
 // @match        *://steamcommunity.com/tradeoffer/new*
 // @icon         data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔺</text></svg>
@@ -187,7 +190,7 @@ main();
 async function main() {
     "use strict";
 
-    if (location.hostname === "backpack.tf" && location.pathname.match(/\/(stats|classifieds|u)/)) {
+    if ((location.hostname === "backpack.tf" || location.hostname === "www.backpack.tf") && location.pathname.match(/\/(stats|classifieds|u)/)) {
         await awaitDocumentReady();
 
         const list_elements = document.getElementsByClassName("media-list");
@@ -870,6 +873,28 @@ function toTradeOfferItem(id) {
         assetid: id,
     };
 }
+
+function correct_currency(metal) {
+    // Using for correct currency balance
+    // Ex. 10.98 ref -> 11 ref
+    let keys = metal[0];
+    let ref = metal[1];
+    let rec = metal[2];
+    let scrap = metal[3];
+    let half_scrap = metal[4];
+
+    // Rebalance the currency
+    if (scrap >= 3) {
+        scrap -= 3;
+        rec += 1;
+    }
+    if (rec >= 3) {
+        rec -= 3;
+        ref += 1;
+    };
+    return [keys, ref, rec, scrap, half_scrap];
+}
+
 function toCurrencyTypes(currency_string, count) {
     const match = currency_string.match(/^(\d+ keys?,? ?)?(\d+(?:\.\d+)? ref)?$/);
     if (!match) return throwError("[toCurrencyTypes]: Could not parse currency " + currency_string);
@@ -901,7 +926,7 @@ function toCurrencyTypes(currency_string, count) {
     };
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
     keys = keys * count;
-    return [keys, ref, rec, scrap, half_scrap];
+    return correct_currency([keys, ref, rec, scrap, half_scrap]);
 }
 
 function pickCurrency(inventory, keys, ref, rec, scrap, half_scrap) {
