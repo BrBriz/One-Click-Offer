@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.4
+// @version      2.0.4.1
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -110,7 +110,7 @@ const itemsWithPriceHalfScrap= [
     "The Half-Zatoichi",
     "The Hitman's Heatmaker",
     "The Holiday Punch",
-    "The Holy Mackere",
+    "The Holy Mackerel",
     "The Homewrecker",
     "The Hot Hand",
     "The Huntsman",
