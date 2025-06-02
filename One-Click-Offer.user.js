@@ -1002,7 +1002,7 @@ function toCurrencyTypes(currency_string, count) {
     let half_scrap = 0;
     if (small_small_metal == 45) {
         half_scrap += 1;
-    } else if (small_small_metal > 45 || small_small_metal < 45) {
+    } else if (small_small_metal !== 45 && small_small_metal !== 0) {
         scrap += 1;
     };
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
