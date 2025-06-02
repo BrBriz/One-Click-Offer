@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.4.1
+// @version      2.0.4.2
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -919,10 +919,10 @@ function toCurrencyTypes(currency_string, count) {
     const small_small_metal = Math.round(((small_metal / 11) % 1) * 100);
     console.log("[toCurrencyTypes]: small_small_metal: ", small_small_metal);
     let half_scrap = 0;
-    if (small_small_metal >= 55 && small_small_metal < 100) {
+    if (small_small_metal == 45) {
+        half_scrap += 1;
+    } else {
         scrap += 1;
-    } else if (small_small_metal >= 9 && small_small_metal < 55) {
-        half_scrap = 1;
     };
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
     keys = keys * count;
