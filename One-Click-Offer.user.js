@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.4.2
+// @version      2.0.5
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -17,6 +17,8 @@
 // @match        *://steamcommunity.com/tradeoffer/new*
 // @icon         data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔺</text></svg>
 // @run-at       document-start
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 
 const allow_change = true;
@@ -26,7 +28,7 @@ const btn_text = "One Click Offer ⇄";
 const DEBUG = false;
 
 // Use it if want better offer sender. Fill SteamAPI -> https://steamcommunity.com/dev/apikey
-const SteamAPI = "";
+let SteamAPI = GM_getValue("SteamAPI", "");
 const GetTradeOffers = "https://api.steampowered.com/IEconService/GetTradeOffers/v1/";
 const GetTradeOffers_params = {
     'key': SteamAPI,
@@ -194,6 +196,78 @@ async function main() {
         await awaitDocumentReady();
 
         const list_elements = document.getElementsByClassName("media-list");
+        const navigation_bar = document.getElementsByClassName("nav navbar-nav navbar-profile-nav")[0];
+        if (navigation_bar) {
+            const li = document.createElement("li");
+            const settings_button = document.createElement("button");
+            settings_button.textContent = "OCF ⚙️";
+            settings_button.className = "btn btn-primary";
+            settings_button.style.margin = "8px";
+            settings_button.style.background = btn_color;
+            settings_button.style.borderColor = btn_color;
+            
+            settings_button.addEventListener("click", () => {
+                if (document.getElementById("steamapi-settings-panel")) {
+                    document.getElementById("steamapi-settings-panel").remove();
+                    return;
+                }
+
+                const panel = document.createElement("div");
+                panel.id = "steamapi-settings-panel";
+                panel.style.position = "absolute";
+                panel.style.top = settings_button.getBoundingClientRect().bottom + window.scrollY + "px";
+                panel.style.left = settings_button.getBoundingClientRect().left + window.scrollX + "px";
+                panel.style.background = "#fff";
+                panel.style.border = "1px solid #ccc";
+                panel.style.padding = "10px";
+                panel.style.zIndex = 9999;
+                panel.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+                panel.style.borderRadius = "8px";
+
+                const label = document.createElement("label");
+                label.textContent = "Steam API Key:";
+                label.style.display = "block";
+
+                const input = document.createElement("input");
+                input.type = "password";
+                input.value = GM_getValue("SteamAPI", "");
+                input.style.width = "300px";
+                input.style.marginTop = "5px";
+
+                const saveBtn = document.createElement("button");
+                saveBtn.textContent = "Save";
+                saveBtn.style.marginTop = "10px";
+                saveBtn.style.marginLeft = "10px";
+                saveBtn.className = "btn btn-success";
+
+                saveBtn.addEventListener("click", () => {
+                    GM_setValue("SteamAPI", input.value);
+                    alert("Steam API Key saved!");
+                    panel.remove();
+                });
+
+                const cancelBtn = document.createElement("button");
+                cancelBtn.textContent = "Cancel";
+                cancelBtn.style.marginTop = "10px";
+                cancelBtn.style.marginLeft = "10px";
+                cancelBtn.className = "btn btn-secondary";
+
+                cancelBtn.addEventListener("click", () => {
+                    panel.remove();
+                });
+
+                panel.appendChild(label);
+                panel.appendChild(input);
+                panel.appendChild(saveBtn);
+                panel.appendChild(cancelBtn);
+
+                document.body.appendChild(panel);
+            });
+
+            li.appendChild(settings_button);
+            navigation_bar.appendChild(li);
+        }
+
         let order_elements = [];
         for (const elements of list_elements) {
             const buy_sell_listings = Array.from(elements.getElementsByTagName("li"));
@@ -460,7 +534,7 @@ async function main() {
         const validTradeOfferStates = [2, 4, 9];
         const taked_assetIds = [];
 
-        if (SteamAPI !== "") {
+        if (SteamAPI !== "" && SteamAPI !== "NaN") {
             try {
                 const response = await fetch(GetTradeOffers + '?' + new URLSearchParams(GetTradeOffers_params));
                 console.log('[SteamAPI/GetTradeOffers]: Response Status:', response.status);
@@ -477,7 +551,13 @@ async function main() {
             } catch (error) {
                 console.error('[SteamAPI/GetTradeOffers]: Error:', error);
             }
+        } else if (SteamAPI === "") {
+            SteamAPI = prompt("Enter your Steam API Key for use trade fetch feature in next time or 'NaN' if don't want use it:");
+                if (SteamAPI) {
+                    GM_setValue("SteamAPI", SteamAPI);
+                }
         }
+        
 
         let our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
 

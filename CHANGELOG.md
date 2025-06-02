@@ -4,6 +4,13 @@
 
 We use a **X.X.X.x** versioning system
 
+## [2.0.5] - 2025-06-02
+### Added
+- Settings panel for API 
+
+### Fixed
+- Balance error with half_scrap
+
 ## [2.0.4] - 2025-05-16
 ### Fixed
 - Added an additional rebalancer to avoid incorrect metal set
