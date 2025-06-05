@@ -4,6 +4,10 @@
 
 We use a **X.X.X.x** versioning system
 
+## [2.0.6] - 2025-06-05
+### Fixed
+- Fixed metal calculation (again). There should no longer be a problem with metal balancing when exchanging offers for more than 1 item
+
 ## [2.0.5] - 2025-06-02
 ### Added
 - Settings panel for API 

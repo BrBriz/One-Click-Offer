@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.5.1
+// @version      2.0.6
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -205,7 +205,7 @@ async function main() {
             settings_button.style.margin = "8px";
             settings_button.style.background = btn_color;
             settings_button.style.borderColor = btn_color;
-            
+
             settings_button.addEventListener("click", () => {
                 if (document.getElementById("steamapi-settings-panel")) {
                     document.getElementById("steamapi-settings-panel").remove();
@@ -482,12 +482,12 @@ async function main() {
                 quantityInput.style.border = "2px solid rgba(151, 143, 143, 0.5)";
                 quantityInput.style.marginLeft = "5px";
                 quantityInput.style.verticalAlign = "middle";
-    
+
                 quantityInput.addEventListener('input', () => {
                     const length = quantityInput.value.length;
                     quantityInput.style.width = `${35 + 6 * length}px`;
                 });
-    
+
                 const btn_clone = send_offer_btn.cloneNode(true);
 
                 btn_clone.id = "instant-button-" + i;
@@ -503,7 +503,7 @@ async function main() {
                     url.searchParams.set('tscript_price', price);
                     url.searchParams.set('tscript_name', item_name);
                     url.searchParams.set('tscript_count', count);
-    
+
                     btn_clone.setAttribute("href", url.toString());
                 };
 
@@ -557,7 +557,6 @@ async function main() {
                     GM_setValue("SteamAPI", SteamAPI);
                 }
         }
-        
 
         let our_filtered_inventory = our_inventory.filter(item => !taked_assetIds.includes(item.id));
 
@@ -989,22 +988,32 @@ function toCurrencyTypes(currency_string, count) {
         const ref_length = match[2].indexOf(" ");
         metal = Number(match[2].slice(0, ref_length));
     }
-    metal = metal * count
-    const ref = Math.floor(metal);
-    const small_metal = Math.round((metal % 1) * 100);
-    console.log("[toCurrencyTypes]: small_metal: ", small_metal);
-    const rec = Math.floor(small_metal / 33);
-    console.log("[toCurrencyTypes]: Rec: ", rec);
-    let scrap = Math.floor(small_metal / 11) % 3;
-    console.log("[toCurrencyTypes]: Scrap: ", scrap);
-    const small_small_metal = Math.round(((small_metal / 11) % 1) * 100);
-    console.log("[toCurrencyTypes]: small_small_metal: ", small_small_metal);
+
+    function roundToHalf(value) {
+        return Math.round(value * 2) / 2;
+    }
+
+    const metal_to_scrap = roundToHalf(metal * 9);
+    console.log("[toCurrencyTypes]: metal_to_scrap: ", metal_to_scrap);
+    const total_scrap = metal_to_scrap * count;
+    console.log("[toCurrencyTypes]: scrap metal: ", total_scrap);
+
+    metal = total_scrap;
+    const ref = Math.floor(total_scrap / 9);
+    console.log("[toCurrencyTypes]: ref: ", ref);
+    metal -= ref * 9;
+    let rec = Math.floor(metal / 3);
+    console.log("[toCurrencyTypes]: rec: ", rec);
+    metal -= rec * 3;
+    let scrap = Math.floor(metal);
+    console.log("[toCurrencyTypes]: scrap: ", scrap);
+    metal -= scrap;
+    console.log("[toCurrencyTypes]: last_metal: ", metal);
     let half_scrap = 0;
-    if (small_small_metal == 45) {
+    if (metal === 0.5) {
         half_scrap += 1;
-    } else if (small_small_metal !== 45 && small_small_metal !== 0) {
-        scrap += 1;
-    };
+    }
+
     console.log("[toCurrencyTypes]: half_scrap: ", half_scrap);
     keys = keys * count;
     return correct_currency([keys, ref, rec, scrap, half_scrap]);
