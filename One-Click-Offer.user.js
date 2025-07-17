@@ -2,11 +2,12 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.0.6
+// @version      2.1.0
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
 // @downloadURL  https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
+// @match        *://backpack.tf/profiles/*
 // @match        *://backpack.tf/stats/*
 // @match        *://backpack.tf/classifieds*
 // @match        *://backpack.tf/u/*
@@ -25,10 +26,14 @@ const allow_change = true;
 const btn_color = "#931F1D";
 const next_btn_color = "#eb2335";
 const btn_text = "One Click Offer ⇄";
-const DEBUG = false;
+const DEBUG = true;
 
 // Use it if want better offer sender. Fill SteamAPI -> https://steamcommunity.com/dev/apikey
+
 let SteamAPI = GM_getValue("SteamAPI", "");
+let BackpackTF_API = GM_getValue("BackpackTF_API", "");
+let BackpackTF_TOKEN = GM_getValue("BackpackTF_TOKEN", "");
+
 const GetTradeOffers = "https://api.steampowered.com/IEconService/GetTradeOffers/v1/";
 const GetTradeOffers_params = {
     'key': SteamAPI,
@@ -192,17 +197,15 @@ main();
 async function main() {
     "use strict";
 
-    if ((location.hostname === "backpack.tf" || location.hostname === "www.backpack.tf") && location.pathname.match(/\/(stats|classifieds|u)/)) {
-        await awaitDocumentReady();
-
-        const list_elements = document.getElementsByClassName("media-list");
+    function createSetting() {
         const navigation_bar = document.getElementsByClassName("nav navbar-nav navbar-profile-nav")[0];
         if (navigation_bar) {
             const li = document.createElement("li");
             const settings_button = document.createElement("button");
-            settings_button.textContent = "OCF ⚙️";
+            settings_button.textContent = "⚙️";
+            settings_button.style.textAlign = "left";
             settings_button.className = "btn btn-primary";
-            settings_button.style.margin = "8px";
+            settings_button.style.margin = "4px";
             settings_button.style.background = btn_color;
             settings_button.style.borderColor = btn_color;
 
@@ -211,7 +214,7 @@ async function main() {
                     document.getElementById("steamapi-settings-panel").remove();
                     return;
                 }
-
+                
                 const panel = document.createElement("div");
                 panel.id = "steamapi-settings-panel";
                 panel.style.position = "absolute";
@@ -224,49 +227,192 @@ async function main() {
                 panel.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
                 panel.style.borderRadius = "8px";
 
-                const label = document.createElement("label");
-                label.textContent = "Steam API Key:";
-                label.style.display = "block";
+                function createSection() {
+                    const section_div = document.createElement("div");
+                    section_div.style.marginBottom = "10px";
+                    section_div.style.display = "flex";
+                    section_div.style.justifyContent = "space-between";
+                    section_div.style.alignItems = "center";
+                    section_div.style.borderBottom = "1px solid #ccc";
+                    section_div.style.paddingBottom = "6px";
 
-                const input = document.createElement("input");
-                input.type = "password";
-                input.value = GM_getValue("SteamAPI", "");
-                input.style.width = "300px";
-                input.style.marginTop = "5px";
+                    // Helper for divider
+                    function createDivider() {
+                        const divider = document.createElement('div');
+                        divider.style.width = '1px';
+                        divider.style.height = '24px';
+                        divider.style.background = '#e0e0e0';
+                        return divider;
+                    }
 
-                const saveBtn = document.createElement("button");
-                saveBtn.textContent = "Save";
-                saveBtn.style.marginTop = "10px";
-                saveBtn.style.marginLeft = "10px";
-                saveBtn.className = "btn btn-success";
+                    // Section buttons
+                    const btn1 = document.createElement('button');
+                    btn1.textContent = 'One-Click-Offer';
+                    btn1.style.flex = '1';
+                    btn1.style.textAlign = 'center';
+                    btn1.style.fontWeight = 'bold';
+                    btn1.style.fontSize = '16px';
+                    btn1.style.background = '#e0e0e0';
+                    btn1.style.border = 'none';
+                    btn1.style.borderRadius = '6px 6px 0 0';
+                    btn1.style.cursor = 'pointer';
+                    btn1.style.padding = '8px 0';
+                    btn1.style.transition = 'background 0.2s';
 
-                saveBtn.addEventListener("click", () => {
-                    GM_setValue("SteamAPI", input.value);
-                    alert("Steam API Key saved!");
-                    panel.remove();
-                });
+                    const btn2 = document.createElement('button');
+                    btn2.textContent = '???';
+                    btn2.style.flex = '1';
+                    btn2.style.textAlign = 'center';
+                    btn2.style.fontWeight = 'bold';
+                    btn2.style.fontSize = '16px';
+                    btn2.style.background = 'transparent';
+                    btn2.style.border = 'none';
+                    btn2.style.borderRadius = '6px 6px 0 0';
+                    btn2.style.cursor = 'pointer';
+                    btn2.style.padding = '8px 0';
+                    btn2.style.transition = 'background 0.2s';
 
-                const cancelBtn = document.createElement("button");
-                cancelBtn.textContent = "Cancel";
-                cancelBtn.style.marginTop = "10px";
-                cancelBtn.style.marginLeft = "10px";
-                cancelBtn.className = "btn btn-secondary";
+                    panel.appendChild(section_div);
 
-                cancelBtn.addEventListener("click", () => {
-                    panel.remove();
-                });
+                    // Button click handlers
+                    btn1.onclick = () => {
+                        btn1.style.background = '#e0e0e0';
+                        btn2.style.background = 'transparent';
+                        panel.innerHTML = "";
+                        createSection();
+                        createBOCO();
+                    };
+                    btn2.onclick = () => {
+                        btn1.style.background = 'transparent';
+                        btn2.style.background = '#e0e0e0';
+                        panel.innerHTML = "Comming soon..."; 
+                    };
 
-                panel.appendChild(label);
-                panel.appendChild(input);
-                panel.appendChild(saveBtn);
-                panel.appendChild(cancelBtn);
+                    // Initial selection
+                    btn1.style.background = '#e0e0e0';
 
+                    section_div.appendChild(btn1);
+                    section_div.appendChild(createDivider());
+                    section_div.appendChild(btn2);
+                    section_div.appendChild(createDivider());  
+                }    
+
+                createSection();
+
+                function createBOCO() {
+                    const SteamAPILabel = document.createElement("label");
+                    SteamAPILabel.textContent = "Steam API Key:";
+                    SteamAPILabel.style.display = "block";
+
+                    const input = document.createElement("input");
+                    input.type = "password";
+                    input.value = GM_getValue("SteamAPI", "");
+                    input.style.width = "300px";
+                    input.style.marginTop = "5px";
+                    input.style.marginBottom = "5px";
+
+                    const saveBtn = document.createElement("button");
+                    saveBtn.textContent = "Save";
+                    saveBtn.style.marginTop = "8px";
+                    saveBtn.style.marginLeft = "10px";
+                    saveBtn.className = "btn btn-success";
+
+                    saveBtn.addEventListener("click", () => {
+                        GM_setValue("SteamAPI", input.value);
+                        alert("Steam API Key saved!");
+                        panel.remove();
+                    });
+
+                    // BackpackTF API Key
+
+                    const BackpackTFAPILabel = document.createElement("label");
+                    BackpackTFAPILabel.textContent = "BacpackTF API Key:";
+                    BackpackTFAPILabel.style.display = "block";
+
+                    const BackpackTFAPI_input = document.createElement("input");
+                    BackpackTFAPI_input.type = "password";
+                    BackpackTFAPI_input.value = GM_getValue("BackpackTF_API", "");
+                    BackpackTFAPI_input.style.width = "300px";
+                    BackpackTFAPI_input.style.marginTop = "5px";
+                    BackpackTFAPI_input.style.marginBottom = "5px"
+
+                    const BackpackTFAPI_saveBtn = document.createElement("button");
+                    BackpackTFAPI_saveBtn.textContent = "Save";
+                    BackpackTFAPI_saveBtn.style.marginTop = "10px";
+                    BackpackTFAPI_saveBtn.style.marginLeft = "10px";
+                    BackpackTFAPI_saveBtn.className = "btn btn-success";
+
+                    BackpackTFAPI_saveBtn.addEventListener("click", () => {
+                        GM_setValue("BackpackTF_API", BackpackTFAPI_input.value);
+                        alert("BackpackTF API Key saved!");
+                        panel.remove();
+                    });
+                    
+                    // Token
+
+                    const BackpackTFTOKENLabel = document.createElement("label");
+                    BackpackTFTOKENLabel.textContent = "BacpackTF TOKEN Key:";
+                    BackpackTFTOKENLabel.style.display = "block";
+
+                    const BackpackTFTOKEN_input = document.createElement("input");
+                    BackpackTFTOKEN_input.type = "password";
+                    BackpackTFTOKEN_input.value = GM_getValue("BackpackTF_TOKEN", "");
+                    BackpackTFTOKEN_input.style.width = "300px";
+                    BackpackTFTOKEN_input.style.marginTop = "5px";
+                    BackpackTFTOKEN_input.style.marginBottom = "5px"
+
+                    const BackpackTFTOKEN_saveBtn = document.createElement("button");
+                    BackpackTFTOKEN_saveBtn.textContent = "Save";
+                    BackpackTFTOKEN_saveBtn.style.marginTop = "10px";
+                    BackpackTFTOKEN_saveBtn.style.marginLeft = "10px";
+                    BackpackTFTOKEN_saveBtn.className = "btn btn-success";
+
+                    BackpackTFTOKEN_saveBtn.addEventListener("click", () => {
+                        GM_setValue("BackpackTF_TOKEN", BackpackTFTOKEN_input.value);
+                        alert("BackpackTF Token Key saved!");
+                        panel.remove();
+                    });
+
+                
+                    // Support Developer div
+                    const supportDiv = document.createElement('div');
+                    supportDiv.style.marginTop = '18px';
+                    supportDiv.style.paddingTop = '8px';
+                    supportDiv.style.textAlign = 'center';
+                    supportDiv.style.fontSize = '15px';
+                    supportDiv.style.color = '#222';
+                    supportDiv.style.borderTop = '1px solid #888';
+                    supportDiv.innerHTML = 'Support the Developer in his studies!<a href="https://send.monobank.ua/jar/7MUGz4L3Sz" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
+
+                    panel.appendChild(SteamAPILabel);
+                    panel.appendChild(input);
+                    panel.appendChild(saveBtn);
+
+                    panel.appendChild(BackpackTFAPILabel);
+                    panel.appendChild(BackpackTFAPI_input);
+                    panel.appendChild(BackpackTFAPI_saveBtn);
+
+                    panel.appendChild(BackpackTFTOKENLabel);
+                    panel.appendChild(BackpackTFTOKEN_input);
+                    panel.appendChild(BackpackTFTOKEN_saveBtn);
+
+                    panel.appendChild(supportDiv);
+                }
+                createBOCO();
                 document.body.appendChild(panel);
             });
 
             li.appendChild(settings_button);
             navigation_bar.appendChild(li);
         }
+    }
+
+    if ((location.hostname === "backpack.tf" || location.hostname === "www.backpack.tf") && location.pathname.match(/\/(stats|classifieds|u)/)) {
+        await awaitDocumentReady();
+
+        const list_elements = document.getElementsByClassName("media-list");
+
+        createSetting()
 
         let order_elements = [];
         for (const elements of list_elements) {
@@ -365,6 +511,374 @@ async function main() {
                 listingButtons.appendChild(quantityInput);
             }
         }
+    } else if (location.hostname === "backpack.tf" || location.hostname === "www.backpack.tf") {
+        await awaitDocumentReady();
+        createSetting()
+        const panels = document.getElementsByClassName("panel-extras");
+
+        for (const panel of panels) {
+            const refreshButton = panel.querySelector('button#refresh-inventory.btn.btn-panel');
+
+            if (refreshButton) {
+                const FastSell = document.createElement("button");
+                FastSell.className = "btn btn-panel";
+                FastSell.title = "Quickly list selected item for sale";
+                const eraserIcon = document.createElement('i');
+                eraserIcon.className = 'fa fa-sw fa-flash';
+                eraserIcon.style.marginRight = '4px';
+                FastSell.appendChild(eraserIcon);
+                FastSell.appendChild(document.createTextNode('Fast Sell'));
+
+                FastSell.addEventListener("click", () => {
+                    const panel = document.getElementById("fast-sell-panel");
+                    if (panel) {
+                        // panel.remove();
+                        return;
+                    }
+
+                    // Init
+
+                    let selected_item = false;
+
+                    // Get all selected items
+
+                    const backpack = document.querySelector("#backpack")
+                    const items = backpack.querySelectorAll("li");
+                    for (const item of items) {
+                        const DOMTokenList = item.classList
+                        const isNoPopover = DOMTokenList.contains("no-popover");
+                        const isSelected = DOMTokenList.contains("unselected")
+                        if (isNoPopover && !isSelected) {
+                            // console.log(item);
+                            if (item.getAttribute('data-tradable') === 0) {
+                                continue;
+                            }
+                            selected_item = item.cloneNode(true);
+                            break;
+                        };
+                    };
+                    if (!selected_item) {
+                        return;
+                    }
+
+                    const panel_UI = createModalPanel({
+                        id: "fast-sell-panel",
+                        width: "500px",
+                        height: "350px",
+                        title: "Fast Sell",
+                        onClose: () => {
+                            const panel = document.getElementById("fast-sell-panel");
+                            if (panel) {
+                                panel.style.transition = 'opacity 0.3s ease, top 0.5s ease';
+                                panel.style.opacity = '0';
+                                panel.style.top = '60%';
+                                setTimeout(() => {
+                                    if (panel.parentNode) panel.parentNode.removeChild(panel);
+                                }, 350);
+                            }
+                        }
+                    });
+
+                    function createModalPanel({id, width, height, title, onClose}) {
+                        const panel = document.createElement('div');
+                        panel.id = id;
+                        panel.style.position = 'fixed';
+                        panel.style.top = '0px';
+                        panel.style.left = '50%';
+                        panel.style.transform = 'translateX(-50%)';
+                        panel.style.background = '#fff';
+                        panel.style.padding = '0';
+                        panel.style.zIndex = 9999;
+                        panel.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                        panel.style.borderRadius = '8px';
+                        panel.style.width = width;
+                        panel.style.height = height;
+                        panel.style.transition = 'top 0.5s ease';
+
+                        // Header
+                        const header = document.createElement('div');
+                        header.style.position = 'relative';
+                        header.style.width = '100%';
+                        header.style.height = '48px';
+                        header.style.background = 'linear-gradient(to bottom, #2b3b47, #12181d)';
+                        header.style.display = 'flex';
+                        header.style.alignItems = 'center';
+                        header.style.justifyContent = 'space-between';
+                        header.style.padding = '0 16px 0 12px';
+                        header.style.borderTopLeftRadius = '8px';
+                        header.style.borderTopRightRadius = '8px';
+                        header.style.boxSizing = 'border-box';
+                        header.style.zIndex = '2';
+
+                        const titleSpan = document.createElement('span');
+                        titleSpan.textContent = title;
+                        titleSpan.style.color = '#ffffff';
+                        titleSpan.style.fontSize = '17px';
+                        titleSpan.style.userSelect = 'none';
+                        titleSpan.style.fontFamily = 'inherit';
+
+                        const exitBtn = document.createElement('button');
+                        exitBtn.textContent = '⨯';
+                        exitBtn.style.fontWeight = 'bold';
+                        exitBtn.style.fontSize = '20px';
+                        exitBtn.style.lineHeight = '1';
+                        exitBtn.style.position = 'static';
+                        exitBtn.style.marginLeft = '16px';
+                        exitBtn.style.color = '#838383';
+                        exitBtn.style.border = 'none';
+                        exitBtn.style.backgroundColor = 'transparent';
+                        exitBtn.style.cursor = 'pointer';
+                        exitBtn.style.zIndex = '10';
+                        exitBtn.onclick = onClose;
+                        
+                        const main_div = document.createElement('div');
+                        main_div.style.position = 'relative';
+                        main_div.style.width = '100%';
+                        main_div.style.height = `${parseInt(height) - 48 - 50}px`;
+                        main_div.style.background = '#ffffffff';
+                        main_div.style.display = 'flex';
+                        main_div.style.alignItems = 'center';
+                        main_div.style.justifyContent = 'space-between';
+                        main_div.style.boxSizing = 'border-box';
+                        main_div.style.zIndex = '2';
+                                        
+                        // Ul
+
+                        const UI_ul = document.createElement("ul");
+                        UI_ul.style.position = 'fixed';
+                        UI_ul.style.top = '73px';
+                        UI_ul.style.left = "0px";
+                        UI_ul.appendChild(selected_item);
+                        
+                        // Description
+
+                        const UI_description = document.createElement("textarea");
+                        UI_description.style.position = 'fixed';
+                        UI_description.style.height = "100px";
+                        UI_description.style.width = `${parseInt(width) - 84}px`;
+                        UI_description.style.top = "188px";
+                        UI_description.style.right = "42px";
+                        UI_description.style.borderRadius = "8px";
+                        UI_description.style.border = "1px solid #ccc";
+                        UI_description.style.resize = "none";
+                        UI_description.style.paddingLeft = "6px";
+
+                        const UI_description_label = document.createElement("label");
+                        UI_description_label.style.position = 'fixed';
+                        UI_description_label.style.height = "20px";
+                        UI_description_label.style.width = `${parseInt(width) - 84}px`;
+                        UI_description_label.style.top = "165px";
+                        UI_description_label.style.right = "42px";
+                        UI_description_label.textContent = "Description";
+
+                        // Currencies
+
+                        const UI_keys_label = document.createElement('label');
+                        UI_keys_label.style.position = 'fixed';
+                        UI_keys_label.style.height = "15px";
+                        UI_keys_label.style.width = "120px";
+                        UI_keys_label.style.top = "60px";
+                        UI_keys_label.style.left = "150px";
+                        UI_keys_label.textContent = "Keys";
+
+                        const UI_keys = document.createElement('input');
+                        UI_keys.style.position = 'fixed';
+                        UI_keys.value = 0;
+                        UI_keys.style.height = "25px";
+                        UI_keys.style.width = "120px";
+                        UI_keys.style.top = "82px";
+                        UI_keys.style.left = "150px";
+                        UI_keys.style.borderRadius = "8px";
+                        UI_keys.style.border = "1px solid #ccc";
+                        UI_keys.style.paddingLeft = "6px";
+
+                        const UI_metal = document.createElement('input');
+                        UI_metal.style.position = 'fixed';
+                        UI_metal.value = 0.00;
+                        UI_metal.style.height = "25px";
+                        UI_metal.style.width = "120px";
+                        UI_metal.style.top = "135px";
+                        UI_metal.style.left = "150px";
+                        UI_metal.style.borderRadius = "8px";
+                        UI_metal.style.border = "1px solid #ccc";
+                        UI_metal.style.paddingLeft = "6px";
+
+                        const UI_metal_label = document.createElement('label');
+                        UI_metal_label.style.position = 'fixed';
+                        UI_metal_label.style.height = "15px";
+                        UI_metal_label.style.width = "120px";
+                        UI_metal_label.style.top = "110px";
+                        UI_metal_label.style.left = "150px";
+                        UI_metal_label.textContent = "Metal";
+
+                        // Bottom div
+                        const bottom_div = document.createElement('div');
+                        bottom_div.style.position = 'relative';
+                        bottom_div.style.width = '100%';
+                        bottom_div.style.height = "50px";
+                        bottom_div.style.bottom = '0px';
+                        bottom_div.style.background = '#ffffffff';
+                        bottom_div.style.display = 'flex';
+                        bottom_div.style.alignItems = 'center';
+                        bottom_div.style.justifyContent = 'flex-start';
+                        bottom_div.style.gap = '16px';
+                        bottom_div.style.padding = '0 16px';
+                        bottom_div.style.boxSizing = 'border-box';
+                        bottom_div.style.zIndex = '2';
+
+                        // First select: Add me to trade / Send me a Trade Offer
+                        const select_offers = document.createElement('select');
+                        select_offers.style.height = '36px';
+                        select_offers.style.width = '180px';
+                        select_offers.style.marginRight = '8px';
+                        select_offers.className = 'form-control';
+                        const option1 = document.createElement('option');
+                        option1.value = '1';
+                        option1.textContent = 'Send me a Trade Offer';
+                        const option2 = document.createElement('option');
+                        option2.value = '0';
+                        option2.textContent = 'Add me to trade';
+                        select_offers.appendChild(option1);
+                        select_offers.appendChild(option2);
+
+                        // Second select: Allow negotiation / Offer buyout only
+                        const select_buyout = document.createElement('select');
+                        select_buyout.style.height = '36px';
+                        select_buyout.style.width = '180px';
+                        select_buyout.className = 'form-control';
+                        const option3 = document.createElement('option');
+                        option3.value = '1';
+                        option3.textContent = 'Offer buyout only';
+                        const option4 = document.createElement('option');
+                        option4.value = '0';
+                        option4.textContent = 'Allow negotiation';
+                        select_buyout.appendChild(option3);
+                        select_buyout.appendChild(option4);
+
+                        // Sell button
+                        const sell_btn = document.createElement('button');
+                        sell_btn.id = "fast-sell-panel-btn-sell";
+                        sell_btn.textContent = "Sell";
+                        sell_btn.style.color = "#dc3545";
+                        sell_btn.style.background = "transparent";
+                        sell_btn.style.border = "2px solid #dc3545";
+                        sell_btn.style.height = "36px";
+                        sell_btn.style.width = "80px";
+                        sell_btn.style.marginLeft = 'auto';
+                        sell_btn.style.borderRadius = "8px";
+                        sell_btn.style.fontWeight = "bold";
+                        sell_btn.style.fontSize = "16px";
+
+                        sell_btn.addEventListener("click", async () => {
+                            const url = `https://backpack.tf/api/v2/classifieds/listings?token=${encodeURIComponent(BackpackTF_TOKEN)}&api=${encodeURIComponent(BackpackTF_API)}`;
+                            const intent = "sell";
+                            const backpack_tf2_id = String(selected_item.getAttribute('data-id'));
+                            const tradeofferspreferred = select_offers.value === '1';
+                            const buyoutonly = select_buyout.value === '1';
+                            const details = UI_description.value;
+                            const currencies = {"metal": parseFloat(UI_metal.value), "keys": parseFloat(UI_keys.value)};
+
+                            if (BackpackTF_API === "") {
+                                BackpackTF_API = prompt("Enter your BackpackTF API Key for use Fast Sell (Get API: next.backpack.tf/account/api-access -> API Key");
+                                    if (BackpackTF_API) {
+                                        GM_setValue("BackpackTF_API", BackpackTF_API);
+                                    }
+                            }
+
+                            if (BackpackTF_TOKEN === "") {
+                                BackpackTF_TOKEN = prompt("Enter your BackpackTF TOKEN Key for use Fast Sell (Get TOKEN: next.backpack.tf/account/api-access -> Access Token");
+                                    if (BackpackTF_TOKEN) {
+                                        GM_setValue("BackpackTF_TOKEN", BackpackTF_TOKEN);
+                                    }
+                            }
+
+                            const payload = {
+                                "id": backpack_tf2_id,
+                                "intent": intent,
+                                "details": details,
+                                "tradeOffersPreferred": tradeofferspreferred,
+                                "buyoutOnly": buyoutonly,
+                                "currencies": currencies
+                            }
+
+                            console.log("[sell_btn(click)] payload:", payload)
+
+                            try {
+                                const response_create_offer = await fetch(url, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(payload)
+                                });
+                                console.log("[sell_btn(click)] response:",response_create_offer);
+                                if (response_create_offer.status === 201) {
+                                    sell_btn.style.border = "2px solid #28a745";
+                                    sell_btn.textContent = "Success!";
+                                    sell_btn.style.color = "#28a745";
+                                } else {
+                                    sell_btn.style.border = "2px solid #ffc107";
+                                    sell_btn.textContent = "Error!";
+                                    sell_btn.style.color = "#ffc107";
+                                }
+                                setTimeout(() => {
+                                    sell_btn.style.border = "2px solid #dc3545";
+                                    sell_btn.textContent = "Sell";
+                                    sell_btn.style.color = "#dc3545";
+                                }, 1500);
+                            } catch (err) {
+                                sell_btn.style.border = "2px solid #ffc107";
+                                sell_btn.textContent = "Error!";
+                                sell_btn.style.color = "#ffc107";
+                                setTimeout(() => {
+                                    sell_btn.style.border = "2px solid #dc3545";
+                                    sell_btn.textContent = "Sell";
+                                    sell_btn.style.color = "#dc3545";
+                                }, 1500);
+                            }
+                        });
+
+                        header.appendChild(titleSpan);
+                        header.appendChild(exitBtn);
+
+                        main_div.appendChild(UI_ul);
+                        main_div.appendChild(UI_description);
+                        main_div.appendChild(UI_description_label);
+                        main_div.appendChild(UI_keys_label);
+                        main_div.appendChild(UI_keys);
+                        main_div.appendChild(UI_metal);
+                        main_div.appendChild(UI_metal_label);
+
+                        bottom_div.appendChild(select_offers);
+                        bottom_div.appendChild(select_buyout);
+                        bottom_div.appendChild(sell_btn);
+
+                        panel.appendChild(header);
+                        panel.appendChild(main_div);
+                        panel.appendChild(bottom_div);
+                        return panel;
+                    }
+
+                    setTimeout(() => {
+                        panel_UI.style.top = "50%";
+                        panel_UI.style.transform = "translate(-50%, -50%)";
+                        panel_UI.style.opacity = '1';
+                    }, 10);
+
+                    panel_UI.style.opacity = '0';
+                    document.body.appendChild(panel_UI);
+                    setTimeout(() => {
+                        panel_UI.style.opacity = '1';
+                    }, 10);
+
+                });
+
+                panel.querySelector("#inventory-toolbar")?.appendChild(FastSell);
+                
+                break;
+            }
+        }
+
     } else if (location.hostname === "next.backpack.tf") {
         //next does not refresh page between pages, so script needs to run on any next page
         let listings_data = undefined;
@@ -999,15 +1513,19 @@ function toCurrencyTypes(currency_string, count) {
     console.log("[toCurrencyTypes]: scrap metal: ", total_scrap);
 
     metal = total_scrap;
+
     const ref = Math.floor(total_scrap / 9);
     console.log("[toCurrencyTypes]: ref: ", ref);
     metal -= ref * 9;
+
     let rec = Math.floor(metal / 3);
     console.log("[toCurrencyTypes]: rec: ", rec);
     metal -= rec * 3;
+
     let scrap = Math.floor(metal);
     console.log("[toCurrencyTypes]: scrap: ", scrap);
     metal -= scrap;
+    
     console.log("[toCurrencyTypes]: last_metal: ", metal);
     let half_scrap = 0;
     if (metal === 0.5) {

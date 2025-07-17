@@ -4,6 +4,13 @@
 
 We use a **X.X.X.x** versioning system
 
+## [2.1.0] - 2025-07-18
+### Added
+- Changed settings button
+- Fast Sell support! Sometimes backpack.tf takes a long time to create a listing, Fast Sell fixes this and creates a listing via API v2 (Fast Sell support only 1 per time a item to sell).
+
+ ![Fast Sell](/images/FastSell.png)
+
 ## [2.0.6] - 2025-06-05
 ### Fixed
 - Fixed metal calculation (again). There should no longer be a problem with metal balancing when exchanging offers for more than 1 item
@@ -22,7 +29,7 @@ We use a **X.X.X.x** versioning system
 
 ## [2.0.3] - 2025-05-15
 ### Added
-- Ability to choose the number of items you want to buy/sell to [next.backpack.tf](https://next.backpack.tf/))
+- Ability to choose the number of items you want to buy/sell to [next.backpack.tf](https://next.backpack.tf/)
 
 ### Fixed
 - Takes 1 scrap insted 2 half_scrap in toCurrencyTypes()
