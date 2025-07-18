@@ -26,7 +26,7 @@ const allow_change = true;
 const btn_color = "#931F1D";
 const next_btn_color = "#eb2335";
 const btn_text = "One Click Offer ⇄";
-const DEBUG = true;
+const DEBUG = false; 
 
 // Use it if want better offer sender. Fill SteamAPI -> https://steamcommunity.com/dev/apikey
 
