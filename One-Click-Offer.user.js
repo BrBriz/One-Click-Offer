@@ -382,7 +382,7 @@ async function main() {
                     supportDiv.style.fontSize = '15px';
                     supportDiv.style.color = '#222';
                     supportDiv.style.borderTop = '1px solid #888';
-                    supportDiv.innerHTML = 'Support the Developer in his studies!<a href="https://send.monobank.ua/jar/7MUGz4L3Sz" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
+                    supportDiv.innerHTML = 'Support the Developer!<a href="https://send.monobank.ua/jar/2Zk6JaVdww" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
 
                     panel.appendChild(SteamAPILabel);
                     panel.appendChild(input);
