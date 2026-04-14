@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      2.1.0
+// @version      3.0.0
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -197,6 +197,41 @@ main();
 async function main() {
     "use strict";
 
+    function applyWallpaper() {
+        const gifUrl = GM_getValue("Wallpaper_URL", "");
+        const bgSize = GM_getValue("Wallpaper_Size", "cover");
+        const bgRepeat = GM_getValue("Wallpaper_Repeat", "no-repeat");
+        const bgAttach = GM_getValue("Wallpaper_Attachment", "fixed");
+        const bgOpacity = GM_getValue("Wallpaper_Opacity", "0.8");
+
+        let style = document.getElementById("custom-wallpaper-style");
+        
+        if (!style) {
+            style = document.createElement('style');
+            style.id = "custom-wallpaper-style";
+            document.head.appendChild(style);
+        }
+
+        if (gifUrl) {
+            style.innerHTML = `
+                body.app-440 {
+                    background-image: url("${gifUrl}") !important;
+                    background-color: #171b1e !important;
+                    background-size: ${bgSize} !important;
+                    background-repeat: ${bgRepeat} !important;
+                    background-attachment: ${bgAttach} !important;
+                }
+                .container {
+                    opacity: ${bgOpacity} !important;
+                }
+            `;
+        } else {
+            style.innerHTML = ""; 
+        }
+    }
+
+    applyWallpaper();
+
     function createSetting() {
         const navigation_bar = document.getElementsByClassName("nav navbar-nav navbar-profile-nav")[0];
         if (navigation_bar) {
@@ -236,7 +271,6 @@ async function main() {
                     section_div.style.borderBottom = "1px solid #ccc";
                     section_div.style.paddingBottom = "6px";
 
-                    // Helper for divider
                     function createDivider() {
                         const divider = document.createElement('div');
                         divider.style.width = '1px';
@@ -245,7 +279,6 @@ async function main() {
                         return divider;
                     }
 
-                    // Section buttons
                     const btn1 = document.createElement('button');
                     btn1.textContent = 'One-Click-Offer';
                     btn1.style.flex = '1';
@@ -254,27 +287,26 @@ async function main() {
                     btn1.style.fontSize = '16px';
                     btn1.style.background = '#e0e0e0';
                     btn1.style.border = 'none';
-                    btn1.style.borderRadius = '6px 6px 0 0';
+                    btn1.style.borderRadius = '6px 0 0 0';
                     btn1.style.cursor = 'pointer';
                     btn1.style.padding = '8px 0';
                     btn1.style.transition = 'background 0.2s';
 
                     const btn2 = document.createElement('button');
-                    btn2.textContent = '???';
+                    btn2.textContent = 'Wallpaper';
                     btn2.style.flex = '1';
                     btn2.style.textAlign = 'center';
                     btn2.style.fontWeight = 'bold';
                     btn2.style.fontSize = '16px';
                     btn2.style.background = 'transparent';
                     btn2.style.border = 'none';
-                    btn2.style.borderRadius = '6px 6px 0 0';
+                    btn2.style.borderRadius = '0 6px 0 0';
                     btn2.style.cursor = 'pointer';
                     btn2.style.padding = '8px 0';
                     btn2.style.transition = 'background 0.2s';
 
                     panel.appendChild(section_div);
 
-                    // Button click handlers
                     btn1.onclick = () => {
                         btn1.style.background = '#e0e0e0';
                         btn2.style.background = 'transparent';
@@ -285,125 +317,253 @@ async function main() {
                     btn2.onclick = () => {
                         btn1.style.background = 'transparent';
                         btn2.style.background = '#e0e0e0';
-                        panel.innerHTML = "Comming soon..."; 
+                        panel.innerHTML = "";
+                        createSection();
+                        createWallpaperMenu();
                     };
 
-                    // Initial selection
                     btn1.style.background = '#e0e0e0';
 
                     section_div.appendChild(btn1);
                     section_div.appendChild(createDivider());
                     section_div.appendChild(btn2);
-                    section_div.appendChild(createDivider());  
-                }    
+            }    
 
-                createSection();
+            createSection();
 
-                function createBOCO() {
-                    const SteamAPILabel = document.createElement("label");
-                    SteamAPILabel.textContent = "Steam API Key:";
-                    SteamAPILabel.style.display = "block";
+            function getSupportDiv() {
+                const supportDiv = document.createElement('div');
+                supportDiv.style.marginTop = '18px';
+                supportDiv.style.paddingTop = '8px';
+                supportDiv.style.textAlign = 'center';
+                supportDiv.style.fontSize = '15px';
+                supportDiv.style.color = '#222';
+                supportDiv.style.borderTop = '1px solid #888';
+                supportDiv.innerHTML = 'Support the Developer!<a href="https://send.monobank.ua/jar/2Zk6JaVdww" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
+                return supportDiv;
+            }
 
-                    const input = document.createElement("input");
-                    input.type = "password";
-                    input.value = GM_getValue("SteamAPI", "");
-                    input.style.width = "300px";
-                    input.style.marginTop = "5px";
-                    input.style.marginBottom = "5px";
+            function createBOCO() {
+                const SteamAPILabel = document.createElement("label");
+                SteamAPILabel.textContent = "Steam API Key:";
+                SteamAPILabel.style.display = "block";
 
-                    const saveBtn = document.createElement("button");
-                    saveBtn.textContent = "Save";
-                    saveBtn.style.marginTop = "8px";
-                    saveBtn.style.marginLeft = "10px";
-                    saveBtn.className = "btn btn-success";
+                const input = document.createElement("input");
+                input.type = "password";
+                input.value = GM_getValue("SteamAPI", "");
+                input.style.width = "300px";
+                input.style.marginTop = "5px";
+                input.style.marginBottom = "5px";
 
-                    saveBtn.addEventListener("click", () => {
-                        GM_setValue("SteamAPI", input.value);
-                        alert("Steam API Key saved!");
-                        panel.remove();
-                    });
+                const saveBtn = document.createElement("button");
+                saveBtn.textContent = "Save";
+                saveBtn.style.marginTop = "8px";
+                saveBtn.style.marginLeft = "10px";
+                saveBtn.className = "btn btn-success";
 
-                    // BackpackTF API Key
+                saveBtn.addEventListener("click", () => {
+                    GM_setValue("SteamAPI", input.value);
+                    alert("Steam API Key saved!");
+                });
 
-                    const BackpackTFAPILabel = document.createElement("label");
-                    BackpackTFAPILabel.textContent = "BacpackTF API Key:";
-                    BackpackTFAPILabel.style.display = "block";
+                const BackpackTFAPILabel = document.createElement("label");
+                BackpackTFAPILabel.textContent = "BacpackTF API Key:";
+                BackpackTFAPILabel.style.display = "block";
 
-                    const BackpackTFAPI_input = document.createElement("input");
-                    BackpackTFAPI_input.type = "password";
-                    BackpackTFAPI_input.value = GM_getValue("BackpackTF_API", "");
-                    BackpackTFAPI_input.style.width = "300px";
-                    BackpackTFAPI_input.style.marginTop = "5px";
-                    BackpackTFAPI_input.style.marginBottom = "5px"
+                const BackpackTFAPI_input = document.createElement("input");
+                BackpackTFAPI_input.type = "password";
+                BackpackTFAPI_input.value = GM_getValue("BackpackTF_API", "");
+                BackpackTFAPI_input.style.width = "300px";
+                BackpackTFAPI_input.style.marginTop = "5px";
+                BackpackTFAPI_input.style.marginBottom = "5px"
 
-                    const BackpackTFAPI_saveBtn = document.createElement("button");
-                    BackpackTFAPI_saveBtn.textContent = "Save";
-                    BackpackTFAPI_saveBtn.style.marginTop = "10px";
-                    BackpackTFAPI_saveBtn.style.marginLeft = "10px";
-                    BackpackTFAPI_saveBtn.className = "btn btn-success";
+                const BackpackTFAPI_saveBtn = document.createElement("button");
+                BackpackTFAPI_saveBtn.textContent = "Save";
+                BackpackTFAPI_saveBtn.style.marginTop = "10px";
+                BackpackTFAPI_saveBtn.style.marginLeft = "10px";
+                BackpackTFAPI_saveBtn.className = "btn btn-success";
 
-                    BackpackTFAPI_saveBtn.addEventListener("click", () => {
-                        GM_setValue("BackpackTF_API", BackpackTFAPI_input.value);
-                        alert("BackpackTF API Key saved!");
-                        panel.remove();
-                    });
-                    
-                    // Token
-
-                    const BackpackTFTOKENLabel = document.createElement("label");
-                    BackpackTFTOKENLabel.textContent = "BacpackTF TOKEN Key:";
-                    BackpackTFTOKENLabel.style.display = "block";
-
-                    const BackpackTFTOKEN_input = document.createElement("input");
-                    BackpackTFTOKEN_input.type = "password";
-                    BackpackTFTOKEN_input.value = GM_getValue("BackpackTF_TOKEN", "");
-                    BackpackTFTOKEN_input.style.width = "300px";
-                    BackpackTFTOKEN_input.style.marginTop = "5px";
-                    BackpackTFTOKEN_input.style.marginBottom = "5px"
-
-                    const BackpackTFTOKEN_saveBtn = document.createElement("button");
-                    BackpackTFTOKEN_saveBtn.textContent = "Save";
-                    BackpackTFTOKEN_saveBtn.style.marginTop = "10px";
-                    BackpackTFTOKEN_saveBtn.style.marginLeft = "10px";
-                    BackpackTFTOKEN_saveBtn.className = "btn btn-success";
-
-                    BackpackTFTOKEN_saveBtn.addEventListener("click", () => {
-                        GM_setValue("BackpackTF_TOKEN", BackpackTFTOKEN_input.value);
-                        alert("BackpackTF Token Key saved!");
-                        panel.remove();
-                    });
-
+                BackpackTFAPI_saveBtn.addEventListener("click", () => {
+                    GM_setValue("BackpackTF_API", BackpackTFAPI_input.value);
+                    alert("BackpackTF API Key saved!");
+                });
                 
-                    // Support Developer div
-                    const supportDiv = document.createElement('div');
-                    supportDiv.style.marginTop = '18px';
-                    supportDiv.style.paddingTop = '8px';
-                    supportDiv.style.textAlign = 'center';
-                    supportDiv.style.fontSize = '15px';
-                    supportDiv.style.color = '#222';
-                    supportDiv.style.borderTop = '1px solid #888';
-                    supportDiv.innerHTML = 'Support the Developer!<a href="https://send.monobank.ua/jar/2Zk6JaVdww" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
+                const BackpackTFTOKENLabel = document.createElement("label");
+                BackpackTFTOKENLabel.textContent = "BacpackTF TOKEN Key:";
+                BackpackTFTOKENLabel.style.display = "block";
 
-                    panel.appendChild(SteamAPILabel);
-                    panel.appendChild(input);
-                    panel.appendChild(saveBtn);
+                const BackpackTFTOKEN_input = document.createElement("input");
+                BackpackTFTOKEN_input.type = "password";
+                BackpackTFTOKEN_input.value = GM_getValue("BackpackTF_TOKEN", "");
+                BackpackTFTOKEN_input.style.width = "300px";
+                BackpackTFTOKEN_input.style.marginTop = "5px";
+                BackpackTFTOKEN_input.style.marginBottom = "5px"
 
-                    panel.appendChild(BackpackTFAPILabel);
-                    panel.appendChild(BackpackTFAPI_input);
-                    panel.appendChild(BackpackTFAPI_saveBtn);
+                const BackpackTFTOKEN_saveBtn = document.createElement("button");
+                BackpackTFTOKEN_saveBtn.textContent = "Save";
+                BackpackTFTOKEN_saveBtn.style.marginTop = "10px";
+                BackpackTFTOKEN_saveBtn.style.marginLeft = "10px";
+                BackpackTFTOKEN_saveBtn.className = "btn btn-success";
 
-                    panel.appendChild(BackpackTFTOKENLabel);
-                    panel.appendChild(BackpackTFTOKEN_input);
-                    panel.appendChild(BackpackTFTOKEN_saveBtn);
+                BackpackTFTOKEN_saveBtn.addEventListener("click", () => {
+                    GM_setValue("BackpackTF_TOKEN", BackpackTFTOKEN_input.value);
+                    alert("BackpackTF Token Key saved!");
+                });
 
-                    panel.appendChild(supportDiv);
+                panel.appendChild(SteamAPILabel);
+                panel.appendChild(input);
+                panel.appendChild(saveBtn);
+
+                panel.appendChild(BackpackTFAPILabel);
+                panel.appendChild(BackpackTFAPI_input);
+                panel.appendChild(BackpackTFAPI_saveBtn);
+
+                panel.appendChild(BackpackTFTOKENLabel);
+                panel.appendChild(BackpackTFTOKEN_input);
+                panel.appendChild(BackpackTFTOKEN_saveBtn);
+
+                panel.appendChild(getSupportDiv());
+            }
+
+            function createWallpaperMenu() {
+                const menuContainer = document.createElement("div");
+                menuContainer.style.maxHeight = "350px";
+                menuContainer.style.overflowY = "auto";
+                menuContainer.style.paddingRight = "5px";
+
+                function addSettingRow(labelText, element) {
+                    const row = document.createElement("div");
+                    row.style.marginBottom = "10px";
+                    const lbl = document.createElement("label");
+                    lbl.textContent = labelText;
+                    lbl.style.display = "block";
+                    lbl.style.fontSize = "13px";
+                    lbl.style.fontWeight = "bold";
+                    lbl.style.marginBottom = "2px";
+                    
+                    element.style.width = "100%";
+                    element.style.boxSizing = "border-box";
+                    
+                    row.appendChild(lbl);
+                    row.appendChild(element);
+                    menuContainer.appendChild(row);
+                    return lbl;
                 }
-                createBOCO();
-                document.body.appendChild(panel);
-            });
 
-            li.appendChild(settings_button);
-            navigation_bar.appendChild(li);
+                const wpInput = document.createElement("input");
+                wpInput.type = "text";
+                wpInput.placeholder = "https://example.com/image.gif";
+                wpInput.value = GM_getValue("Wallpaper_URL", "");
+                wpInput.style.padding = "4px";
+                addSettingRow("Background URL:", wpInput);
+
+                const sizeSelect = document.createElement("select");
+                ["cover", "contain", "auto", "100% 100%"].forEach(opt => {
+                    const option = document.createElement("option");
+                    option.value = opt;
+                    option.textContent = opt;
+                    if(opt === GM_getValue("Wallpaper_Size", "cover")) option.selected = true;
+                    sizeSelect.appendChild(option);
+                });
+                sizeSelect.style.padding = "4px";
+                addSettingRow("Background Size:", sizeSelect);
+
+                const repeatSelect = document.createElement("select");
+                ["no-repeat", "repeat", "repeat-x", "repeat-y"].forEach(opt => {
+                    const option = document.createElement("option");
+                    option.value = opt;
+                    option.textContent = opt;
+                    if(opt === GM_getValue("Wallpaper_Repeat", "no-repeat")) option.selected = true;
+                    repeatSelect.appendChild(option);
+                });
+                repeatSelect.style.padding = "4px";
+                addSettingRow("Background Repeat:", repeatSelect);
+
+                const attachSelect = document.createElement("select");
+                ["fixed", "scroll", "local"].forEach(opt => {
+                    const option = document.createElement("option");
+                    option.value = opt;
+                    option.textContent = opt;
+                    if(opt === GM_getValue("Wallpaper_Attachment", "fixed")) option.selected = true;
+                    attachSelect.appendChild(option);
+                });
+                attachSelect.style.padding = "4px";
+                addSettingRow("Background Attachment:", attachSelect);
+
+                const opacityInput = document.createElement("input");
+                opacityInput.type = "range";
+                opacityInput.min = "0.1";
+                opacityInput.max = "1.0";
+                opacityInput.step = "0.05";
+                opacityInput.value = GM_getValue("Wallpaper_Opacity", "0.8");
+                
+                const opacityLabel = addSettingRow("Container Opacity: ", opacityInput);
+                const opacityValSpan = document.createElement("span");
+                opacityValSpan.textContent = opacityInput.value;
+                opacityValSpan.style.fontWeight = "normal";
+                opacityLabel.appendChild(opacityValSpan);
+                
+                opacityInput.addEventListener("input", () => {
+                    opacityValSpan.textContent = opacityInput.value;
+                });
+
+                const btnContainer = document.createElement("div");
+                btnContainer.style.display = "flex";
+                btnContainer.style.gap = "10px";
+                btnContainer.style.marginTop = "15px";
+
+                const wpSaveBtn = document.createElement("button");
+                wpSaveBtn.textContent = "Save";
+                wpSaveBtn.className = "btn btn-success";
+                wpSaveBtn.style.flex = "1";
+
+                wpSaveBtn.addEventListener("click", () => {
+                    GM_setValue("Wallpaper_URL", wpInput.value);
+                    GM_setValue("Wallpaper_Size", sizeSelect.value);
+                    GM_setValue("Wallpaper_Repeat", repeatSelect.value);
+                    GM_setValue("Wallpaper_Attachment", attachSelect.value);
+                    GM_setValue("Wallpaper_Opacity", opacityInput.value);
+                    applyWallpaper(); 
+                    alert("Wallpaper settings saved!");
+                });
+
+                const wpClearBtn = document.createElement("button");
+                wpClearBtn.textContent = "Clear";
+                wpClearBtn.className = "btn btn-danger";
+                wpClearBtn.style.flex = "1";
+
+                wpClearBtn.addEventListener("click", () => {
+                    GM_setValue("Wallpaper_URL", "");
+                    wpInput.value = "";
+                    sizeSelect.value = "cover";
+                    repeatSelect.value = "no-repeat";
+                    attachSelect.value = "fixed";
+                    opacityInput.value = "0.8";
+                    opacityValSpan.textContent = "0.8";
+                    
+                    GM_setValue("Wallpaper_Size", "cover");
+                    GM_setValue("Wallpaper_Repeat", "no-repeat");
+                    GM_setValue("Wallpaper_Attachment", "fixed");
+                    GM_setValue("Wallpaper_Opacity", "0.8");
+                    
+                    applyWallpaper();
+                    alert("Wallpaper cleared!");
+                });
+
+                btnContainer.appendChild(wpSaveBtn);
+                btnContainer.appendChild(wpClearBtn);
+                menuContainer.appendChild(btnContainer);
+
+                panel.appendChild(menuContainer);
+                panel.appendChild(getSupportDiv());
+            }
+
+            createBOCO();
+            document.body.appendChild(panel);
+        });
+
+        li.appendChild(settings_button);
+        navigation_bar.appendChild(li);
         }
     }
 
@@ -1222,8 +1382,6 @@ async function main() {
      * @property {Function} loadInventory - Function for loading inventory
      * @property {Function} getInventory
      * @property {Function} LoadForeignAppContextData
-     *
-     *
      * @typedef {number} g_ulTradePartnerSteamID
      */
 
@@ -1246,71 +1404,73 @@ function getInventories() {
         res(inventories);
     });
 
-    function getSingleInventory(User) {
-        return new Promise(async res => {
+function getSingleInventory(User) {
+    return new Promise(async res => {
+        let inv = User.rgContexts["440"]["2"].inventory?.rgInventory;
+        if (!inv || User.cLoadsInFlight !== 0) {
+            if (User.cLoadsInFlight === 0) User.loadInventory();
+            inv = await waitForInventoryLoad();
+        } else inv = Object.values(inv);
+        res(parseInventory(inv));
+    });
+
+function waitForInventoryLoad() {
+    return new Promise(async res => {
+        let done = false;
+
+        //poll for inventory ready
+        await (async () => {
             let inv = User.rgContexts["440"]["2"].inventory?.rgInventory;
-            if (!inv || User.cLoadsInFlight !== 0) {
-                if (User.cLoadsInFlight === 0) User.loadInventory();
-                inv = await waitForInventoryLoad();
-            } else inv = Object.values(inv);
-            res(parseInventory(inv));
-        });
+            while (!inv) {
+                await waitFor(0.5);
+                if (done) return;
+                inv = User.rgContexts["440"]["2"].inventory?.rgInventory;
+            }
 
-        function waitForInventoryLoad() {
-            return new Promise(async res => {
-                let done = false;
+            done = true;
+            const parsed_inv = Object.values(inv);
+            res(parsed_inv);
+        })();
 
-                //poll for inventory ready
-                await (async () => {
-                    let inv = User.rgContexts["440"]["2"].inventory?.rgInventory;
-                    while (!inv) {
-                        await waitFor(0.5);
-                        if (done) return;
-                        inv = User.rgContexts["440"]["2"].inventory?.rgInventory;
-                    }
+        //wait for intercepted request, fast but less reliable
+        const on_load = User.OnLoadInventoryComplete;
+        User.OnLoadInventoryComplete = function (data, appid, contextid) {
+            if (appid === 440 && contextid === 2) {
+                done = true;
+                res(Object.values(data.responseJSON.rgInventory));
+            }
 
-                    done = true;
-                    const parsed_inv = Object.values(inv);
-                    res(parsed_inv);
-                })();
+            User.OnLoadInventoryComplete = on_load;
+            return on_load.apply(this, arguments);
+        };
+        const on_fail = User.OnInventoryLoadFailed;
+        User.OnInventoryLoadFailed = async function (data, appid, contextid) {
+            if (appid === 440 && contextid === 2) {
+                console.log("[waitForInventoryLoad]: load failed, requesting manually");
+                const inv = await getInventory(User.strSteamId);
+                done = true;
+                res(inv);
+            }
 
-                //wait for intercepted request, fast but less reliable
-                const on_load = User.OnLoadInventoryComplete;
-                User.OnLoadInventoryComplete = function (data, appid, contextid) {
-                    if (appid === 440 && contextid === 2) {
-                        done = true;
-                        res(Object.values(data.responseJSON.rgInventory));
-                    }
-
-                    User.OnLoadInventoryComplete = on_load;
-                    return on_load.apply(this, arguments);
-                };
-                const on_fail = User.OnInventoryLoadFailed;
-                User.OnInventoryLoadFailed = async function (data, appid, contextid) {
-                    if (appid === 440 && contextid === 2) {
-                        console.log("[waitForInventoryLoad]: load failed, requesting manually");
-                        const inv = await getInventory(User.strSteamId);
-                        done = true;
-                        res(inv);
-                    }
-
-                    User.OnInventoryLoadFailed = on_fail;
-                    return on_fail.apply(this, arguments);
-                };
-            });
-        }
-    }
-
-    function parseInventory(items) {
-        return items.map(item => {
-            return {
-                id: item.id,
-                name: nameFromItem(item),
-            };
-        });
-    }
+            User.OnInventoryLoadFailed = on_fail;
+            return on_fail.apply(this, arguments);
+        };
+    });
 }
 
+}
+
+function parseInventory(items) {
+    return items.map(item => {
+        return {
+            id: item.id,
+            defindex: item.app_data.def_index,
+            name: nameFromItem(item),
+        };
+    });
+}
+
+}
     /**
      * @property {Object} more_items
      */
