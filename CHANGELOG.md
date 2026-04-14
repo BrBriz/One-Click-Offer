@@ -6,7 +6,7 @@ We use a **X.X.X.x** versioning system
 
 ## [3.0.0] - 2026-04-14
 ### Added
-- Added Wallpaper menu chager! (image/gif)
+- Added Wallpaper menu changer! (image/gif)
 ![Wallpaper](/images/Wallpaper.gif)
 
 ## [2.1.0] - 2025-07-18
