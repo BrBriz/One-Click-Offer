@@ -1,4 +1,4 @@
-# One-Click Offer for Backpack.tf [![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://stand-with-ukraine.pp.ua)
+# One-Click Offer for Backpack.tf ![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)
 [![license](https://img.shields.io/github/license/BrBriz/One-Click-Offer)](https://github.com/BrBriz/One-Click-Offer/blob/main/LICENSE)
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-lightyellow?style=flat&logo=JavaScript)
