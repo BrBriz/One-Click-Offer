@@ -4,6 +4,19 @@
 
 We use a **X.X.X.x** versioning system
 
+## [3.1.0] - 2026-07-09
+### Added
+- Support items with attached parts (Buy Order/ Multiple in Sell Order)
+
+### Fixed
+- Opacity glitch preventing UI interaction
+
+### Changed
+- Settings style
+- Settings button moved to user menu
+
+![SettingsButton](/images/SettingsButton.png)
+
 ## [3.0.0] - 2026-04-14
 ### Added
 - Added Wallpaper menu changer! (image/gif)
