@@ -1,8 +1,10 @@
-# One-Click Offer for Backpack.tf
-
-[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://stand-with-ukraine.pp.ua)
-[![steam](https://shields.io/badge/steam-1b2838?logo=steam)](https://steamcommunity.com/id/BrBriz/)
+# One-Click Offer for Backpack.tf ![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)
 [![license](https://img.shields.io/github/license/BrBriz/One-Click-Offer)](https://github.com/BrBriz/One-Click-Offer/blob/main/LICENSE)
+
+![JavaScript](https://img.shields.io/badge/JavaScript-lightyellow?style=flat&logo=JavaScript)
+[![steam](https://shields.io/badge/steam-1b2838?logo=steam)](https://steamcommunity.com/id/BrBriz/)
+![TF2](https://img.shields.io/badge/Team_Fortress_2-orange?style=flat)
+![Backpack](https://img.shields.io/badge/backpack.tf-blue?style=flat)
 
 ### INFORMATION: THIS PROJECT BASED AND USING THIS PROJECT BY [Brom127](https://github.com/peleicht/backpack-offer-sender/) 
 
