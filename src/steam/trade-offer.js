@@ -45,19 +45,22 @@ export async function sendOffer(items_to_give, items_to_receive) {
 
 /**
  * Normalize to remove any of the following prefixes: "Taunt: ", "The"
+ * UPD.: Removing "The" in Non-Craftable specific items
  * @param {String} name
  * @returns
  */
 export function normalizeName(name) {
+    if (name.startsWith("Non-Craftable The ")) {
+        name = name.replace("Non-Craftable The ", "Non-Craftable ");
+    }
+
     const prefixes = ["Taunt: ", "The "];
     for (const prefix of prefixes) {
         if (name.startsWith(prefix)) {
             name = name.substring(prefix.length);
         }
     }
-    if (DEBUG) {
-        console.log("normalizeName: " + name);
-    }
+    
     return name;
 }
 

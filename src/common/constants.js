@@ -73,7 +73,7 @@ export const itemsWithPriceHalfScrap = new Set([
     "Force-A-Nature",
     "Fortified Compound",
     "Frontier Justice",
-    "The Gas Passer",
+    "Gas Passer",
     "Gloves of Running Urgently",
     "Gunboats",
     "Gunslinger",

@@ -4,6 +4,12 @@
 
 We use a **X.X.X.x** versioning system
 
+## [3.1.1] - 2026-08-21
+### Fixed
+- Issue with items `Non-Craftable The ...`
+### Changed
+- Items name always normalizing by next.backpack.tf style (Removing `The`)
+
 ## [3.1.0] - 2026-07-09
 ### Added
 - Support items with attached parts (Buy Order/ Multiple in Sell Order)

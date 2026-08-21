@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      3.1.0
+// @version      3.1.1
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -33,146 +33,146 @@
   var color_text_light = "#FFEDDF";
   var DEBUG = false;
   var itemsWithPriceHalfScrap = /* @__PURE__ */ new Set([
-    "The Rocket Jumper",
-    "The Quick-Fix",
-    "The Sticky Jumper",
-    "The Air Strike",
+    "Rocket Jumper",
+    "Quick-Fix",
+    "Sticky Jumper",
+    "Air Strike",
     "Ali Baba's Wee Booties",
-    "The Ambassador",
-    "The Amputator",
-    "The Atomizer",
-    "The Axtinguisher",
-    "The B.A.S.E. Jumper",
+    "Ambassador",
+    "Amputator",
+    "Atomizer",
+    "Axtinguisher",
+    "B.A.S.E. Jumper",
     "Baby Face's Blaster",
-    "The Back Scatter",
-    "The Back Scratcher",
-    "The Backburner",
-    "The Battalion's Backup",
-    "The Bazaar Bargain",
-    "The Beggar's Bazooka",
-    "The Big Earner",
-    "The Black Box",
-    "The Blutsauger",
+    "Back Scatter",
+    "Back Scratcher",
+    "Backburner",
+    "Battalion's Backup",
+    "Bazaar Bargain",
+    "Beggar's Bazooka",
+    "Big Earner",
+    "Black Box",
+    "Blutsauger",
     "Bonk! Atomic Punch",
-    "The Bootlegger",
-    "The Boston Basher",
-    "The Brass Beast",
-    "The Buff Banner",
-    "The Buffalo Steak Sandvich",
-    "The Bushwacka",
-    "The Candy Cane",
-    "The Chargin' Targe",
-    "The Claidheamh M\xF2r",
-    "The Classic",
-    "The Cleaner's Carbine",
-    "The Cloak and Dagger",
-    "The Concheror",
+    "Bootlegger",
+    "Boston Basher",
+    "Brass Beast",
+    "Buff Banner",
+    "Buffalo Steak Sandvich",
+    "Bushwacka",
+    "Candy Cane",
+    "Chargin' Targe",
+    "Claidheamh M\xF2r",
+    "Classic",
+    "Cleaner's Carbine",
+    "Cloak and Dagger",
+    "Concheror",
     "Conniver's Kunai",
-    "The Cow Mangler 5000",
-    "The Cozy Camper",
+    "Cow Mangler 5000",
+    "Cozy Camper",
     "Crit-a-Cola",
     "Crusader's Crossbow",
-    "The Dalokohs Bar",
+    "Dalokohs Bar",
     "Darwin's Danger Shield",
-    "The Dead Ringer",
-    "The Degreaser",
+    "Dead Ringer",
+    "Degreaser",
     "Detonator",
-    "The Diamondback",
-    "The Direct Hit",
-    "The Disciplinary Action",
-    "The Dragon's Fury",
-    "The Enforcer",
-    "The Equalizer",
-    "The Escape Plan",
-    "The Eureka Effect",
-    "The Eviction Notice",
-    "The Eyelander",
-    "The Family Business",
-    "The Fan O'War",
-    "The Fists of Steel",
-    "The Flare Gun",
-    "The Flying Guillotine",
-    "The Force-A-Nature",
-    "The Fortified Compound",
+    "Diamondback",
+    "Direct Hit",
+    "Disciplinary Action",
+    "Dragon's Fury",
+    "Enforcer",
+    "Equalizer",
+    "Escape Plan",
+    "Eureka Effect",
+    "Eviction Notice",
+    "Eyelander",
+    "Family Business",
+    "Fan O'War",
+    "Fists of Steel",
+    "Flare Gun",
+    "Flying Guillotine",
+    "Force-A-Nature",
+    "Fortified Compound",
     "Frontier Justice",
-    "The Gas Passer",
+    "Gas Passer",
     "Gloves of Running Urgently",
-    "The Gunboats",
-    "The Gunslinger",
-    "The Half-Zatoichi",
-    "The Hitman's Heatmaker",
-    "The Holiday Punch",
-    "The Holy Mackerel",
-    "The Homewrecker",
-    "The Hot Hand",
-    "The Huntsman",
-    "The Huo-Long Heater",
-    "The Iron Bomber",
-    "The Jag",
+    "Gunboats",
+    "Gunslinger",
+    "Half-Zatoichi",
+    "Hitman's Heatmaker",
+    "Holiday Punch",
+    "Holy Mackerel",
+    "Homewrecker",
+    "Hot Hand",
+    "Huntsman",
+    "Huo-Long Heater",
+    "Iron Bomber",
+    "Jag",
     "Jarate",
-    "The Killing Gloves of Boxing",
-    "The Kritzkrieg",
+    "Killing Gloves of Boxing",
+    "Kritzkrieg",
     "L'Etranger",
-    "The Liberty Launcher",
-    "The Loch-n-Load",
-    "The Lollichop",
-    "The Loose Cannon",
-    "The Machina",
+    "Liberty Launcher",
+    "Loch-n-Load",
+    "Lollichop",
+    "Loose Cannon",
+    "Machina",
     "Mad Milk",
-    "The Manmelter",
-    "The Mantreads",
-    "The Market Gardener",
+    "Manmelter",
+    "Mantreads",
+    "Market Gardener",
     "Natascha",
-    "The Neon Annihilator",
+    "Neon Annihilator",
     "Nessie's Nine Iron",
-    "The Original",
-    "The Overdose",
-    "The Pain Train",
-    "The Panic Attack",
-    "The Persian Persuader",
-    "The Phlogistinator",
-    "The Pomson 6000",
-    "The Postal Pummeler",
-    "The Powerjack",
+    "Original",
+    "Overdose",
+    "Pain Train",
+    "Panic Attack",
+    "Persian Persuader",
+    "Phlogistinator",
+    "Pomson 6000",
+    "Postal Pummeler",
+    "Powerjack",
     "Pretty Boy's Pocket Pistol",
-    "The Quickiebomb Launcher",
-    "The Rainblower",
-    "The Razorback",
-    "The Red-Tape Recorder",
-    "The Rescue Ranger",
-    "The Reserve Shooter",
-    "The Righteous Bison",
-    "The Sandman",
-    "The Sandvich",
-    "The Scorch Shot",
-    "The Scotsman's Skullcutter",
-    "The Scottish Handshake",
-    "The Scottish Resistance",
-    "The Second Banana",
-    "The Shahanshah",
+    "Quickiebomb Launcher",
+    "Rainblower",
+    "Razorback",
+    "Red-Tape Recorder",
+    "Rescue Ranger",
+    "Reserve Shooter",
+    "Righteous Bison",
+    "Sandman",
+    "Sandvich",
+    "Scorch Shot",
+    "Scotsman's Skullcutter",
+    "Scottish Handshake",
+    "Scottish Resistance",
+    "Second Banana",
+    "Shahanshah",
     "Sharpened Volcano Fragment",
-    "The Short Circuit",
-    "The Shortstop",
-    "The Soda Popper",
-    "The Solemn Vow",
-    "The Southern Hospitality",
-    "The Splendid Screen",
-    "The Spy-cicle",
-    "The Sun-on-a-Stick",
-    "The Sydney Sleeper",
-    "The Thermal Thruster",
-    "The Third Degree",
-    "The Tide Turner",
+    "Short Circuit",
+    "Shortstop",
+    "Soda Popper",
+    "Solemn Vow",
+    "Southern Hospitality",
+    "Splendid Screen",
+    "Spy-cicle",
+    "Sun-on-a-Stick",
+    "Sydney Sleeper",
+    "Thermal Thruster",
+    "Third Degree",
+    "Tide Turner",
     "Tomislav",
-    "The Tribalman's Shiv",
-    "The Ubersaw",
-    "The Ullapool Caber",
-    "The Vita-Saw",
-    "The Warrior's Spirit",
-    "The Widowmaker",
-    "The Winger",
-    "The Wrangler",
-    "The Wrap Assassin",
+    "Tribalman's Shiv",
+    "Ubersaw",
+    "Ullapool Caber",
+    "Vita-Saw",
+    "Warrior's Spirit",
+    "Widowmaker",
+    "Winger",
+    "Wrangler",
+    "Wrap Assassin",
     "Your Eternal Reward"
   ]);
 
@@ -1307,14 +1307,14 @@
     }
   }
   function normalizeName(name) {
+    if (name.startsWith("Non-Craftable The ")) {
+      name = name.replace("Non-Craftable The ", "Non-Craftable ");
+    }
     const prefixes = ["Taunt: ", "The "];
     for (const prefix of prefixes) {
       if (name.startsWith(prefix)) {
         name = name.substring(prefix.length);
       }
-    }
-    if (DEBUG) {
-      console.log("normalizeName: " + name);
     }
     return name;
   }
@@ -1492,8 +1492,7 @@
     const takeRec = invRec.slice(recStart, recStart + rec);
     const takeScrap = invScrap.slice(scrapStart, scrapStart + scrap);
     const takeHalfScrap = invHalfScrap.slice(halfScrapStart, halfScrapStart + halfScrap);
-    console.log(`[pickCurrency]: Take: Keys: ${takeKeys.length}; Ref: ${takeRef.length}; Rec: ${takeRec.length}; Scrap: ${takeScrap.length}; 
-        Half scrap: ${takeHalfScrap.length}`);
+    console.log(`[pickCurrency]: Take: Keys: ${takeKeys.length}; Ref: ${takeRef.length}; Rec: ${takeRec.length}; Scrap: ${takeScrap.length}; Half scrap: ${takeHalfScrap.length}`);
     const items = [...takeKeys, ...takeRef, ...takeRec, ...takeScrap, ...takeHalfScrap];
     if (keys < 0 || ref < 0 || rec < 0 || scrap < 0 || halfScrap < 0 || change.ref < 0 || change.rec < 0 || change.scrap < 0 || change.halfScrap < 0 || keyStart < 0 || refStart < 0 || recStart < 0 || scrapStart < 0 || halfScrapStart < 0 || keys === void 0 || ref === void 0 || rec === void 0 || scrap === void 0 || halfScrap === void 0 || keys > invKeys.length || ref > invRef.length || rec > invRec.length || scrap > invScrap.length || halfScrap > invHalfScrap.length || items.length < keys || takeKeys.length !== keys || takeRef.length !== ref || takeRec.length !== rec || takeScrap.length !== scrap || takeHalfScrap.length !== halfScrap || Math.round((ref + rec / 3 + scrap / 9 + halfScrap / 20) * 100) !== Math.round((takeRef.length + takeRec.length / 3 + takeScrap.length / 9 + takeHalfScrap.length / 20) * 100)) {
       console.error("[pickCurrency]: Something went wrong balancing currencies: ", {
@@ -1586,7 +1585,10 @@
         GM_setValue("SteamAPI", config.SteamAPI);
       }
     }
-    let ourFilteredInventory = ourInventory.filter((item) => !takedAssetIds.includes(item.id));
+    let ourFilteredInventory = ourInventory.filter((item) => !takedAssetIds.includes(item.id)).map((item) => ({
+      ...item,
+      name: normalizeName(item.name)
+    }));
     if (!params.has("tscript_id")) {
       const neededItemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
       const currencyString = params.get("tscript_price");
@@ -1601,12 +1603,6 @@
       });
       console.groupEnd();
       const neededItems = [];
-      if (document.referrer === "https://next.backpack.tf/") {
-        ourFilteredInventory = ourFilteredInventory.map((item) => ({
-          ...item,
-          name: normalizeName(item.name)
-        }));
-      }
       DEBUG && console.log("[Buy Order]: ourFilteredInventory: ", ourFilteredInventory);
       let itemsByName = ourFilteredInventory.filter((item) => item.name === neededItemName);
       if (strangeParts && strangeParts.length > 0) {
