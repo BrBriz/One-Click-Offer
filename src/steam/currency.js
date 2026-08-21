@@ -198,8 +198,7 @@ export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
     const takeRec = invRec.slice(recStart, recStart + rec);
     const takeScrap = invScrap.slice(scrapStart, scrapStart + scrap);
     const takeHalfScrap = invHalfScrap.slice(halfScrapStart, halfScrapStart + halfScrap);
-    console.log(`[pickCurrency]: Take: Keys: ${takeKeys.length}; Ref: ${takeRef.length}; Rec: ${takeRec.length}; Scrap: ${takeScrap.length}; 
-        Half scrap: ${takeHalfScrap.length}`);
+    console.log(`[pickCurrency]: Take: Keys: ${takeKeys.length}; Ref: ${takeRef.length}; Rec: ${takeRec.length}; Scrap: ${takeScrap.length}; Half scrap: ${takeHalfScrap.length}`);
 
     const items = [...takeKeys, ...takeRef, ...takeRec, ...takeScrap, ...takeHalfScrap];
 

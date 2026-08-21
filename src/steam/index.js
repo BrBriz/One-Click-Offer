@@ -46,7 +46,10 @@ export async function run() {
             }
     }
 
-    let ourFilteredInventory = ourInventory.filter(item => !takedAssetIds.includes(item.id));
+    let ourFilteredInventory = (ourInventory.filter(item => !takedAssetIds.includes(item.id))).map(item => ({
+        ...item,
+        name: normalizeName(item.name)
+    }));
 
     if (!params.has("tscript_id")) {
         const neededItemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
@@ -63,13 +66,6 @@ export async function run() {
         });
         console.groupEnd();
         const neededItems = [];
-
-        if (document.referrer === "https://next.backpack.tf/") {
-            ourFilteredInventory = ourFilteredInventory.map(item => ({
-                ...item,
-                name: normalizeName(item.name)
-            }));
-        }
 
         DEBUG && console.log("[Buy Order]: ourFilteredInventory: ", ourFilteredInventory);
 

@@ -56,7 +56,7 @@ export function normalizeName(name) {
         }
     }
     if (DEBUG) {
-        console.log("normalizeName: " + name)
+        console.log("normalizeName: " + name);
     }
     return name;
 }
