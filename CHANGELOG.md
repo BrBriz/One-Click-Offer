@@ -4,6 +4,10 @@
 
 We use a **X.X.X.x** versioning system
 
+## [3.1.1.1] - 2026-10-02
+### Changed
+- Default Opacity now is 1, instead 0.8, which no more making site content like "grey"
+
 ## [3.1.1] - 2026-08-21
 ### Fixed
 - Issue with items `Non-Craftable The ...`

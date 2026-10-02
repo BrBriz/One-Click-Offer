@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      3.1.1
+// @version      3.1.1.1
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -182,7 +182,7 @@
     const bgSize = GM_getValue("Wallpaper_Size", "cover");
     const bgRepeat = GM_getValue("Wallpaper_Repeat", "no-repeat");
     const bgAttach = GM_getValue("Wallpaper_Attachment", "fixed");
-    const bgOpacity = GM_getValue("Wallpaper_Opacity", "0.8");
+    const bgOpacity = GM_getValue("Wallpaper_Opacity", "1");
     let style = document.getElementById("custom-wallpaper-style");
     if (!style) {
       style = document.createElement("style");
@@ -446,7 +446,7 @@
           opacityInput.min = "0.1";
           opacityInput.max = "1.0";
           opacityInput.step = "0.05";
-          opacityInput.value = GM_getValue("Wallpaper_Opacity", "0.8");
+          opacityInput.value = GM_getValue("Wallpaper_Opacity", "1");
           const opacityLabel = addSettingRow("Container Opacity: ", opacityInput);
           opacityLabel.style.color = color_text_light;
           const opacityValSpan = document.createElement("span");
@@ -482,12 +482,12 @@
             sizeSelect.value = "cover";
             repeatSelect.value = "no-repeat";
             attachSelect.value = "fixed";
-            opacityInput.value = "0.8";
-            opacityValSpan.textContent = "0.8";
+            opacityInput.value = "1";
+            opacityValSpan.textContent = "1";
             GM_setValue("Wallpaper_Size", "cover");
             GM_setValue("Wallpaper_Repeat", "no-repeat");
             GM_setValue("Wallpaper_Attachment", "fixed");
-            GM_setValue("Wallpaper_Opacity", "0.8");
+            GM_setValue("Wallpaper_Opacity", "1");
             applyWallpaper();
           });
           btnContainer.appendChild(wpSaveBtn);

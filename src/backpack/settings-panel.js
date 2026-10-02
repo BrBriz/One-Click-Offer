@@ -5,7 +5,7 @@ export function applyWallpaper() {
     const bgSize = GM_getValue("Wallpaper_Size", "cover");
     const bgRepeat = GM_getValue("Wallpaper_Repeat", "no-repeat");
     const bgAttach = GM_getValue("Wallpaper_Attachment", "fixed");
-    const bgOpacity = GM_getValue("Wallpaper_Opacity", "0.8");
+    const bgOpacity = GM_getValue("Wallpaper_Opacity", "1");
 
     let style = document.getElementById("custom-wallpaper-style");
 
@@ -316,7 +316,7 @@ export function createSetting() {
                 opacityInput.min = "0.1";
                 opacityInput.max = "1.0";
                 opacityInput.step = "0.05";
-                opacityInput.value = GM_getValue("Wallpaper_Opacity", "0.8");
+                opacityInput.value = GM_getValue("Wallpaper_Opacity", "1");
 
                 const opacityLabel = addSettingRow("Container Opacity: ", opacityInput);
                 opacityLabel.style.color = color_text_light;
@@ -359,13 +359,13 @@ export function createSetting() {
                     sizeSelect.value = "cover";
                     repeatSelect.value = "no-repeat";
                     attachSelect.value = "fixed";
-                    opacityInput.value = "0.8";
-                    opacityValSpan.textContent = "0.8";
+                    opacityInput.value = "1";
+                    opacityValSpan.textContent = "1";
 
                     GM_setValue("Wallpaper_Size", "cover");
                     GM_setValue("Wallpaper_Repeat", "no-repeat");
                     GM_setValue("Wallpaper_Attachment", "fixed");
-                    GM_setValue("Wallpaper_Opacity", "0.8");
+                    GM_setValue("Wallpaper_Opacity", "1");
 
                     applyWallpaper();
                 });
