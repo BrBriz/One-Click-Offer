@@ -1,3 +1,6 @@
+import { OfferStatus } from "./enums.js";
+import { set_offer_status } from "../steam/offer-status.js";
+
 export function awaitDocumentReady() {
     return new Promise(async res => {
         if (document.readyState !== "loading") res();
@@ -9,7 +12,8 @@ export function waitFor(seconds) {
     return new Promise(res => setTimeout(res, seconds * 1000));
 }
 
-export function throwError(err) {
+export function throwError(code, err) {
+    set_offer_status(OfferStatus.ERROR, code, String(err));
     const params = new URLSearchParams(location.search);
     const buy_sell = params.has("for_item") ? "Buy" : "Sell";
     const item = params.get("tscript_name");

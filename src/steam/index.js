@@ -4,18 +4,23 @@ import { interceptInventoryRequest, getInventories } from "./inventory.js";
 import { normalizeName, toTradeOfferItem, sendOffer } from "./trade-offer.js";
 import { toCurrencyTypes, pickCurrency } from "./currency.js";
 import { DEBUG } from "../common/constants.js";
+import { OfferError, OfferStatus } from "../common/enums.js";
+import { set_offer_status } from "./offer-status.js";
 
 export async function run() {
     const params = new URLSearchParams(location.search);
     if (!params.has("tscript_price")) return;
 
+    set_offer_status(OfferStatus.STARTED);
     interceptInventoryRequest();
     await awaitDocumentReady();
 
     let itemsToGive = [];
     let itemsToReceive = [];
 
+    set_offer_status(OfferStatus.LOADING_INVENTORIES);
     let [ourInventory, theirInventory] = await getInventories();
+    set_offer_status(OfferStatus.BUILDING_OFFER);
     window.our_inv = ourInventory;
     window.their_inv = theirInventory;
 
@@ -90,7 +95,7 @@ export async function run() {
             }
         }
 
-        if (!neededItems) return throwError("[Buy Order]: Could not find item in your inventory.");
+        if (!neededItems) return throwError(OfferError.ITEM_NOT_FOUND, "[Buy Order]: Could not find item in your inventory.");
 
         let actualCount = neededItems.length;
         if (requestedCount == actualCount) {
@@ -128,7 +133,7 @@ export async function run() {
             break;
         }
 
-        if (actualCount === 0) return throwError("[Buy Order]: Could not balance currencies.");
+        if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Buy Order]: Could not balance currencies.");
 
     } else {
         const itemId = params.get("tscript_id");
@@ -174,7 +179,7 @@ export async function run() {
             }
         }
 
-        if (!neededItems) return throwError("[Sell Order]: Item(-s) has already been sold.");
+        if (!neededItems) return throwError(OfferError.ITEM_SOLD, "[Sell Order]: Item(-s) has already been sold.");
 
         let actualCount = neededItems.length;
         if (actualCount == requestedCount) {
@@ -224,11 +229,15 @@ export async function run() {
             break;
         }
 
-        if (actualCount === 0) return throwError("[Sell Order]: Could not balance currencies.");
+        if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Sell Order]: Could not balance currencies.");
 
     }
 
+    set_offer_status(OfferStatus.SENDING);
     const offerId = await sendOffer(itemsToGive, itemsToReceive);
-    if (offerId) console.log("[One-Click-Offer/Final]: Success");
+    if (offerId) {
+        set_offer_status(OfferStatus.SENT);
+        console.log("[One-Click-Offer/Final]: Success");
+    }
     if (offerId && !DEBUG) window.close();
 }

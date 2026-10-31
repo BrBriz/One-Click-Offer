@@ -4,6 +4,14 @@
 
 We use a **X.X.X.x** versioning system
 
+## [3.1.2] - 2026-10-31
+### Added
+- DOM attributes for parser scripts to read the offer status:
+  - `data-one-click-offer-status`: current offer status
+  - `data-one-click-offer-error-id`: error identifier, when an error occurs
+  - `data-one-click-offer-error-message`: error description, when an error occurs
+- See `src/common/enums.js` for supported status values 
+ 
 ## [3.1.1.1] - 2026-10-02
 ### Changed
 - Default Opacity now is 1, instead 0.8, which no more making site content like "grey"

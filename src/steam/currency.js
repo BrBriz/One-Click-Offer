@@ -1,5 +1,6 @@
 import { allow_change, DEBUG, itemsWithPriceHalfScrap } from "../common/constants.js";
 import { throwError } from "../common/dom-utils.js";
+import { OfferError } from "../common/enums.js";
 
 export function correctCurrency(metal) {
     // Using for correct currency balance
@@ -24,7 +25,7 @@ export function correctCurrency(metal) {
 
 export function toCurrencyTypes(currencyString, count) {
     const match = currencyString.match(/^(\d+ keys?,? ?)?(\d+(?:\.\d+)? ref)?$/);
-    if (!match) return throwError("[toCurrencyTypes]: Could not parse currency: " + currencyString);
+    if (!match) return throwError(OfferError.INVALID_PRICE, "[toCurrencyTypes]: Could not parse currency: " + currencyString);
 
     let keys = 0;
     let metal = 0;
@@ -97,9 +98,9 @@ export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
     DEBUG && console.log("[pickCurrency]: Inventory:", inventory);
     DEBUG && console.log("[pickCurrency]: Inventory (half scrap):", invHalfScrap)
     console.log("[pickCurrency]: Half scrap in the start: " + halfScrap);
-    if (invKeys.length < keys) return throwError("[pickCurrency]: Insufficient Keys");
-    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return throwError("[pickCurrency]: Insufficient Metal");
-    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return throwError("[pickCurrency]: Insufficient Metal");
+    if (invKeys.length < keys) return throwError(OfferError.INSUFFICIENT_KEYS, "[pickCurrency]: Insufficient Keys");
+    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
 
     let leftoverRef = invRef.length - ref;
     let leftoverRec = invRec.length - rec;
@@ -150,7 +151,7 @@ export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
 
     //use half_scrap if not enough scrap
     if (leftoverScrap < 0) {
-        if (leftoverHalfScrap < -leftoverScrap * 2) return throwError("[pickCurrency]: Insufficient Metal");
+        if (leftoverHalfScrap < -leftoverScrap * 2) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
 
         scrap -= leftoverScrap;
         halfScrap += -leftoverScrap * 2;

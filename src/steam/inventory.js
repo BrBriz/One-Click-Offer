@@ -1,4 +1,5 @@
 import { waitFor, throwError } from "../common/dom-utils.js";
+import { OfferError } from "../common/enums.js";
 import { internal_request_sent, setInternalRequestSent } from "../common/config.js";
 import { nameFromItem, getAttachedParts, getDescription } from "./item-descriptions.js";
 
@@ -42,7 +43,7 @@ export function getInventories() {
 
         let done = false;
         setTimeout(() => {
-            if (!done) throwError("[getInventories]: Timeout waiting for inventory data.");
+            if (!done) throwError(OfferError.INVENTORY_TIMEOUT, "[getInventories]: Timeout waiting for inventory data.");
         }, 15000);
 
         const inventories = await Promise.all([getSingleInventory(UserYou), getSingleInventory(UserThem)]);
@@ -126,19 +127,19 @@ export async function getInventory(steam_id) {
     try {
         const response = await fetch("https://steamcommunity.com/inventory/" + steam_id + "/440/2?count=2000&l=english");
 
-        if (!response.ok) throwError("[getInventory]: response status error: " + response.status);
+        if (!response.ok) throwError(OfferError.INVENTORY_LOAD_FAILED, "[getInventory]: response status error: " + response.status);
         body = await response.json();
         if (body.more_items) {
             const moreResponse = await fetch("https://steamcommunity.com/inventory/" + steam_id + "/440/2?count=1000&more_start=1000&l=english");
 
-            if (!moreResponse.ok) throwError("[getInventory]: more_response status error: " + moreResponse.status);
+            if (!moreResponse.ok) throwError(OfferError.INVENTORY_LOAD_FAILED, "[getInventory]: more_response status error: " + moreResponse.status);
             const more_body = await moreResponse.json();
 
             body.assets = body.assets.concat(more_body.assets);
             body.descriptions = body.descriptions.concat(more_body.descriptions);
         }
     } catch (err) {
-        return throwError("[getInventory]: Could not obtain inventory data: " + err);
+        return throwError(OfferError.INVENTORY_LOAD_FAILED, "[getInventory]: Could not obtain inventory data: " + err);
     }
 
     const quickDescriptionLookup = {};

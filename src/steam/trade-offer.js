@@ -1,5 +1,6 @@
 import { DEBUG } from "../common/constants.js";
 import { throwError } from "../common/dom-utils.js";
+import { OfferError } from "../common/enums.js";
 
 /**
  * @typedef {number} g_sessionID
@@ -29,18 +30,21 @@ export async function sendOffer(items_to_give, items_to_receive) {
     const form = new FormData();
     for (let key in body) form.append(key, body[key]);
 
+    let response_body;
     try {
-        const response_body = await (
+        response_body = await (
             await fetch("https://steamcommunity.com/tradeoffer/new/send", {
                 method: "POST",
                 body: form,
             })
         ).json();
+    } catch (err) {
+        return throwError(OfferError.SEND_FAILED, "[sendOffer]: " + err);
+    }
 
-        if (response_body.strError) return throwError("[sendOffer]: " + response_body.strError);
+    if (response_body.strError) return throwError(OfferError.SEND_FAILED, "[sendOffer]: " + response_body.strError);
 
-        return response_body.tradeofferid;
-    } catch {}
+    return response_body.tradeofferid;
 }
 
 /**
