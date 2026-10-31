@@ -1,5 +1,5 @@
 import { OfferStatus } from "./enums.js";
-import { set_offer_status } from "../steam/offer-status.js";
+import { get_offer_status, set_offer_status } from "../steam/offer-status.js";
 
 export function awaitDocumentReady() {
     return new Promise(async res => {
@@ -13,6 +13,7 @@ export function waitFor(seconds) {
 }
 
 export function throwError(code, err) {
+    if (get_offer_status() === OfferStatus.ERROR) throw err;
     set_offer_status(OfferStatus.ERROR, code, String(err));
     const params = new URLSearchParams(location.search);
     const buy_sell = params.has("for_item") ? "Buy" : "Sell";

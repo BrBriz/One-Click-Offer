@@ -43,6 +43,7 @@ export async function sendOffer(items_to_give, items_to_receive) {
     }
 
     if (response_body.strError) return throwError(OfferError.SEND_FAILED, "[sendOffer]: " + response_body.strError);
+    if (!response_body.tradeofferid) return throwError(OfferError.SEND_FAILED, "[sendOffer]: No trade offer id in response: " + JSON.stringify(response_body));
 
     return response_body.tradeofferid;
 }

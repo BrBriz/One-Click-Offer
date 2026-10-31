@@ -43,10 +43,13 @@ export function getInventories() {
 
         let done = false;
         setTimeout(() => {
-            if (!done) throwError(OfferError.INVENTORY_TIMEOUT, "[getInventories]: Timeout waiting for inventory data.");
+            if (done) return;
+            done = true;
+            throwError(OfferError.INVENTORY_TIMEOUT, "[getInventories]: Timeout waiting for inventory data.");
         }, 15000);
 
         const inventories = await Promise.all([getSingleInventory(UserYou), getSingleInventory(UserThem)]);
+        if (done) return;
         done = true;
 
         res(inventories);

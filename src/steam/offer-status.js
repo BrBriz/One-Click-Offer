@@ -1,3 +1,7 @@
+export function get_offer_status() {
+    return document.documentElement.getAttribute("data-one-click-offer-status");
+}
+
 export function set_offer_status(status, errorId, message) {
     const root = document.documentElement;
     root.setAttribute("data-one-click-offer-status", status);
