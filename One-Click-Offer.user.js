@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      3.1.1.1
+// @version      3.1.2
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -197,6 +197,14 @@
             background-repeat: ${bgRepeat} !important;
             background-attachment: ${bgAttach} !important;
         }
+        ${gifUrl ? `
+        /* next.backpack.tf draws its wallpaper (bricks.webp) on #content-wrapper via --background-image */
+        #content-wrapper {
+            background-image: url("${gifUrl}") !important;
+            background-size: ${bgSize} !important;
+            background-repeat: ${bgRepeat} !important;
+            background-attachment: ${bgAttach} !important;
+        }` : ""}
         .container {
             opacity: ${bgOpacity} !important;
         }
@@ -221,297 +229,329 @@
       settings_button.style.background = btn_color;
       settings_button.style.borderColor = btn_color;
       settings_button.style.color = "#ffffff";
-      settings_button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        if (document.getElementById("steamapi-settings-panel")) {
-          document.getElementById("steamapi-settings-panel").remove();
-          return;
-        }
-        const panel = document.createElement("div");
-        panel.id = "steamapi-settings-panel";
-        panel.style.position = "fixed";
-        panel.style.top = "60px";
-        panel.style.right = "20px";
-        panel.style.left = "auto";
-        panel.style.background = bg_primary;
-        panel.style.border = `1px solid ${bg_secondary}`;
-        panel.style.padding = "10px";
-        panel.style.zIndex = 9999;
-        panel.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
-        panel.style.borderRadius = "8px";
-        function createSection(activeTab = "main") {
-          const section_div = document.createElement("div");
-          section_div.style.marginBottom = "10px";
-          section_div.style.display = "flex";
-          section_div.style.justifyContent = "space-between";
-          section_div.style.alignItems = "center";
-          section_div.style.borderBottom = "1px solid #ccc";
-          section_div.style.paddingBottom = "6px";
-          function createDivider() {
-            const divider = document.createElement("div");
-            divider.style.width = "1px";
-            divider.style.height = "24px";
-            divider.style.background = "#e0e0e0";
-            return divider;
-          }
-          const btn1 = document.createElement("button");
-          btn1.textContent = "One-Click-Offer";
-          btn1.style.color = color_text_light;
-          btn1.style.flex = "1";
-          btn1.style.textAlign = "center";
-          btn1.style.fontWeight = "bold";
-          btn1.style.fontSize = "16px";
-          btn1.style.background = activeTab === "main" ? bg_secondary : "transparent";
-          btn1.style.border = "none";
-          btn1.style.borderRadius = "6px 0 0 0";
-          btn1.style.cursor = "pointer";
-          btn1.style.padding = "8px 0";
-          btn1.style.transition = "background 0.2s";
-          const btn2 = document.createElement("button");
-          btn2.textContent = "Wallpaper";
-          btn2.style.color = color_text_light;
-          btn2.style.flex = "1";
-          btn2.style.textAlign = "center";
-          btn2.style.fontWeight = "bold";
-          btn2.style.fontSize = "16px";
-          btn2.style.background = activeTab === "wallpaper" ? bg_secondary : "transparent";
-          btn2.style.border = "none";
-          btn2.style.borderRadius = "0 6px 0 0";
-          btn2.style.cursor = "pointer";
-          btn2.style.padding = "8px 0";
-          btn2.style.transition = "background 0.2s";
-          panel.appendChild(section_div);
-          btn1.onclick = () => {
-            panel.innerHTML = "";
-            createSection("main");
-            createMain();
-          };
-          btn2.onclick = () => {
-            panel.innerHTML = "";
-            createSection("wallpaper");
-            createWallpaperMenu();
-          };
-          section_div.appendChild(btn1);
-          section_div.appendChild(createDivider());
-          section_div.appendChild(btn2);
-        }
-        createSection("main");
-        function getSupportDiv() {
-          const supportDiv = document.createElement("div");
-          supportDiv.style.marginTop = "18px";
-          supportDiv.style.paddingTop = "8px";
-          supportDiv.style.textAlign = "center";
-          supportDiv.style.fontSize = "15px";
-          supportDiv.style.color = color_text_light;
-          supportDiv.style.borderTop = "1px solid #888";
-          supportDiv.innerHTML = 'Support the Developer!<a href="https://send.monobank.ua/jar/2Zk6JaVdww" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
-          return supportDiv;
-        }
-        function createMain() {
-          const SteamAPILabel = document.createElement("label");
-          SteamAPILabel.style.color = color_text_light;
-          SteamAPILabel.textContent = "Steam API Key:";
-          SteamAPILabel.style.display = "block";
-          const SteamAPI_input = document.createElement("input");
-          SteamAPI_input.style.border = "1px solid #ccc";
-          SteamAPI_input.style.borderRadius = "4px";
-          SteamAPI_input.type = "password";
-          SteamAPI_input.value = GM_getValue("SteamAPI", "");
-          SteamAPI_input.style.width = "300px";
-          SteamAPI_input.style.marginTop = "5px";
-          SteamAPI_input.style.marginBottom = "5px";
-          const saveBtn = document.createElement("button");
-          saveBtn.textContent = "Save";
-          saveBtn.style.marginTop = "8px";
-          saveBtn.style.marginLeft = "10px";
-          saveBtn.className = "btn btn-success";
-          saveBtn.addEventListener("click", () => {
-            GM_setValue("SteamAPI", SteamAPI_input.value);
-            alert("Steam API Key saved!");
-          });
-          const BackpackTFAPILabel = document.createElement("label");
-          BackpackTFAPILabel.style.color = color_text_light;
-          BackpackTFAPILabel.textContent = "BacpackTF API Key:";
-          BackpackTFAPILabel.style.display = "block";
-          const BackpackTFAPI_input = document.createElement("input");
-          BackpackTFAPI_input.style.border = "1px solid #ccc";
-          BackpackTFAPI_input.style.borderRadius = "4px";
-          BackpackTFAPI_input.type = "password";
-          BackpackTFAPI_input.value = GM_getValue("BackpackTF_API", "");
-          BackpackTFAPI_input.style.width = "300px";
-          BackpackTFAPI_input.style.marginTop = "5px";
-          BackpackTFAPI_input.style.marginBottom = "5px";
-          const BackpackTFAPI_saveBtn = document.createElement("button");
-          BackpackTFAPI_saveBtn.textContent = "Save";
-          BackpackTFAPI_saveBtn.style.marginTop = "10px";
-          BackpackTFAPI_saveBtn.style.marginLeft = "10px";
-          BackpackTFAPI_saveBtn.className = "btn btn-success";
-          BackpackTFAPI_saveBtn.addEventListener("click", () => {
-            GM_setValue("BackpackTF_API", BackpackTFAPI_input.value);
-            alert("BackpackTF API Key saved!");
-          });
-          const BackpackTFTOKENLabel = document.createElement("label");
-          BackpackTFTOKENLabel.style.color = color_text_light;
-          BackpackTFTOKENLabel.textContent = "BacpackTF TOKEN Key:";
-          BackpackTFTOKENLabel.style.display = "block";
-          const BackpackTFTOKEN_input = document.createElement("input");
-          BackpackTFTOKEN_input.style.border = "1px solid #ccc";
-          BackpackTFTOKEN_input.style.borderRadius = "4px";
-          BackpackTFTOKEN_input.type = "password";
-          BackpackTFTOKEN_input.value = GM_getValue("BackpackTF_TOKEN", "");
-          BackpackTFTOKEN_input.style.width = "300px";
-          BackpackTFTOKEN_input.style.marginTop = "5px";
-          BackpackTFTOKEN_input.style.marginBottom = "5px";
-          const BackpackTFTOKEN_saveBtn = document.createElement("button");
-          BackpackTFTOKEN_saveBtn.textContent = "Save";
-          BackpackTFTOKEN_saveBtn.style.marginTop = "10px";
-          BackpackTFTOKEN_saveBtn.style.marginLeft = "10px";
-          BackpackTFTOKEN_saveBtn.className = "btn btn-success";
-          BackpackTFTOKEN_saveBtn.addEventListener("click", () => {
-            GM_setValue("BackpackTF_TOKEN", BackpackTFTOKEN_input.value);
-            alert("BackpackTF Token Key saved!");
-          });
-          panel.appendChild(SteamAPILabel);
-          panel.appendChild(SteamAPI_input);
-          panel.appendChild(saveBtn);
-          panel.appendChild(BackpackTFAPILabel);
-          panel.appendChild(BackpackTFAPI_input);
-          panel.appendChild(BackpackTFAPI_saveBtn);
-          panel.appendChild(BackpackTFTOKENLabel);
-          panel.appendChild(BackpackTFTOKEN_input);
-          panel.appendChild(BackpackTFTOKEN_saveBtn);
-          panel.appendChild(getSupportDiv());
-        }
-        function createWallpaperMenu() {
-          const menuContainer = document.createElement("div");
-          menuContainer.style.width = "300px";
-          menuContainer.style.maxHeight = "350px";
-          menuContainer.style.overflowY = "auto";
-          menuContainer.style.paddingRight = "5px";
-          function addSettingRow(labelText, element) {
-            const row = document.createElement("div");
-            row.style.marginBottom = "10px";
-            const lbl = document.createElement("label");
-            lbl.textContent = labelText;
-            lbl.style.color = color_text_light;
-            lbl.style.display = "block";
-            lbl.style.fontSize = "13px";
-            lbl.style.fontWeight = "bold";
-            lbl.style.marginBottom = "2px";
-            element.style.width = "100%";
-            element.style.boxSizing = "border-box";
-            row.appendChild(lbl);
-            row.appendChild(element);
-            menuContainer.appendChild(row);
-            return lbl;
-          }
-          const wpInput = document.createElement("input");
-          wpInput.type = "text";
-          wpInput.placeholder = "https://example.com/image.gif";
-          wpInput.value = GM_getValue("Wallpaper_URL", "");
-          wpInput.style.padding = "4px";
-          addSettingRow("Background URL:", wpInput);
-          const sizeSelect = document.createElement("select");
-          ["cover", "contain", "auto", "100% 100%"].forEach((opt) => {
-            const option = document.createElement("option");
-            option.value = opt;
-            option.textContent = opt;
-            if (opt === GM_getValue("Wallpaper_Size", "cover")) option.selected = true;
-            sizeSelect.appendChild(option);
-          });
-          sizeSelect.style.padding = "4px";
-          addSettingRow("Background Size:", sizeSelect);
-          const repeatSelect = document.createElement("select");
-          ["no-repeat", "repeat", "repeat-x", "repeat-y"].forEach((opt) => {
-            const option = document.createElement("option");
-            option.value = opt;
-            option.textContent = opt;
-            if (opt === GM_getValue("Wallpaper_Repeat", "no-repeat")) option.selected = true;
-            repeatSelect.appendChild(option);
-          });
-          repeatSelect.style.padding = "4px";
-          addSettingRow("Background Repeat:", repeatSelect);
-          const attachSelect = document.createElement("select");
-          ["fixed", "scroll", "local"].forEach((opt) => {
-            const option = document.createElement("option");
-            option.value = opt;
-            option.textContent = opt;
-            if (opt === GM_getValue("Wallpaper_Attachment", "fixed")) option.selected = true;
-            attachSelect.appendChild(option);
-          });
-          attachSelect.style.padding = "4px";
-          addSettingRow("Background Attachment:", attachSelect);
-          const opacityInput = document.createElement("input");
-          opacityInput.type = "range";
-          opacityInput.min = "0.1";
-          opacityInput.max = "1.0";
-          opacityInput.step = "0.05";
-          opacityInput.value = GM_getValue("Wallpaper_Opacity", "1");
-          const opacityLabel = addSettingRow("Container Opacity: ", opacityInput);
-          opacityLabel.style.color = color_text_light;
-          const opacityValSpan = document.createElement("span");
-          opacityValSpan.textContent = opacityInput.value;
-          opacityValSpan.style.fontWeight = "normal";
-          opacityLabel.appendChild(opacityValSpan);
-          opacityInput.addEventListener("input", () => {
-            opacityValSpan.textContent = opacityInput.value;
-          });
-          const btnContainer = document.createElement("div");
-          btnContainer.style.display = "flex";
-          btnContainer.style.gap = "10px";
-          btnContainer.style.marginTop = "15px";
-          const wpSaveBtn = document.createElement("button");
-          wpSaveBtn.textContent = "Save";
-          wpSaveBtn.className = "btn btn-success";
-          wpSaveBtn.style.flex = "1";
-          wpSaveBtn.addEventListener("click", () => {
-            GM_setValue("Wallpaper_URL", wpInput.value);
-            GM_setValue("Wallpaper_Size", sizeSelect.value);
-            GM_setValue("Wallpaper_Repeat", repeatSelect.value);
-            GM_setValue("Wallpaper_Attachment", attachSelect.value);
-            GM_setValue("Wallpaper_Opacity", opacityInput.value);
-            applyWallpaper();
-          });
-          const wpClearBtn = document.createElement("button");
-          wpClearBtn.textContent = "Clear";
-          wpClearBtn.className = "btn btn-danger";
-          wpClearBtn.style.flex = "1";
-          wpClearBtn.addEventListener("click", () => {
-            GM_setValue("Wallpaper_URL", "");
-            wpInput.value = "";
-            sizeSelect.value = "cover";
-            repeatSelect.value = "no-repeat";
-            attachSelect.value = "fixed";
-            opacityInput.value = "1";
-            opacityValSpan.textContent = "1";
-            GM_setValue("Wallpaper_Size", "cover");
-            GM_setValue("Wallpaper_Repeat", "no-repeat");
-            GM_setValue("Wallpaper_Attachment", "fixed");
-            GM_setValue("Wallpaper_Opacity", "1");
-            applyWallpaper();
-          });
-          btnContainer.appendChild(wpSaveBtn);
-          btnContainer.appendChild(wpClearBtn);
-          menuContainer.appendChild(btnContainer);
-          panel.appendChild(menuContainer);
-          panel.appendChild(getSupportDiv());
-        }
-        createMain();
-        document.body.appendChild(panel);
-      });
-      document.addEventListener("click", (event) => {
-        const panel = document.getElementById("steamapi-settings-panel");
-        if (panel) {
-          const path = event.composedPath();
-          const isClickInsideMenu = path.includes(panel);
-          const isClickOnButton = path.includes(settings_button);
-          if (!isClickInsideMenu && !isClickOnButton) {
-            panel.remove();
-          }
-        }
-      });
+      settings_button.addEventListener("click", toggleSettingsPanel);
       li.appendChild(settings_button);
       dropdown_menu.appendChild(li);
+    }
+  }
+  function toggleSettingsPanel(event) {
+    event.stopPropagation();
+    if (document.getElementById("steamapi-settings-panel")) {
+      document.getElementById("steamapi-settings-panel").remove();
+      return;
+    }
+    const panel = document.createElement("div");
+    panel.id = "steamapi-settings-panel";
+    panel.style.position = "fixed";
+    panel.style.top = "60px";
+    panel.style.right = "20px";
+    panel.style.left = "auto";
+    panel.style.background = bg_primary;
+    panel.style.border = `1px solid ${bg_secondary}`;
+    panel.style.padding = "10px";
+    panel.style.zIndex = 9999;
+    panel.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
+    panel.style.borderRadius = "8px";
+    function createSection(activeTab = "main") {
+      const section_div = document.createElement("div");
+      section_div.style.marginBottom = "10px";
+      section_div.style.display = "flex";
+      section_div.style.justifyContent = "space-between";
+      section_div.style.alignItems = "center";
+      section_div.style.borderBottom = "1px solid #ccc";
+      section_div.style.paddingBottom = "6px";
+      function createDivider() {
+        const divider = document.createElement("div");
+        divider.style.width = "1px";
+        divider.style.height = "24px";
+        divider.style.background = "#e0e0e0";
+        return divider;
+      }
+      const btn1 = document.createElement("button");
+      btn1.textContent = "One-Click-Offer";
+      btn1.style.color = color_text_light;
+      btn1.style.flex = "1";
+      btn1.style.textAlign = "center";
+      btn1.style.fontWeight = "bold";
+      btn1.style.fontSize = "16px";
+      btn1.style.background = activeTab === "main" ? bg_secondary : "transparent";
+      btn1.style.border = "none";
+      btn1.style.borderRadius = "6px 0 0 0";
+      btn1.style.cursor = "pointer";
+      btn1.style.padding = "8px 0";
+      btn1.style.transition = "background 0.2s";
+      const btn2 = document.createElement("button");
+      btn2.textContent = "Wallpaper";
+      btn2.style.color = color_text_light;
+      btn2.style.flex = "1";
+      btn2.style.textAlign = "center";
+      btn2.style.fontWeight = "bold";
+      btn2.style.fontSize = "16px";
+      btn2.style.background = activeTab === "wallpaper" ? bg_secondary : "transparent";
+      btn2.style.border = "none";
+      btn2.style.borderRadius = "0 6px 0 0";
+      btn2.style.cursor = "pointer";
+      btn2.style.padding = "8px 0";
+      btn2.style.transition = "background 0.2s";
+      panel.appendChild(section_div);
+      btn1.onclick = () => {
+        panel.innerHTML = "";
+        createSection("main");
+        createMain();
+      };
+      btn2.onclick = () => {
+        panel.innerHTML = "";
+        createSection("wallpaper");
+        createWallpaperMenu();
+      };
+      section_div.appendChild(btn1);
+      section_div.appendChild(createDivider());
+      section_div.appendChild(btn2);
+    }
+    createSection("main");
+    function getSupportDiv() {
+      const supportDiv = document.createElement("div");
+      supportDiv.style.marginTop = "18px";
+      supportDiv.style.paddingTop = "8px";
+      supportDiv.style.textAlign = "center";
+      supportDiv.style.fontSize = "15px";
+      supportDiv.style.color = color_text_light;
+      supportDiv.style.borderTop = "1px solid #888";
+      supportDiv.innerHTML = 'Support the Developer!<a href="https://send.monobank.ua/jar/2Zk6JaVdww" target="_blank" style="color:#1976d2;text-decoration:underline;margin-left:6px;">Donate</a>';
+      return supportDiv;
+    }
+    function createMain() {
+      const SteamAPILabel = document.createElement("label");
+      SteamAPILabel.style.color = color_text_light;
+      SteamAPILabel.textContent = "Steam API Key:";
+      SteamAPILabel.style.display = "block";
+      const SteamAPI_input = document.createElement("input");
+      SteamAPI_input.style.border = "1px solid #ccc";
+      SteamAPI_input.style.borderRadius = "4px";
+      SteamAPI_input.type = "password";
+      SteamAPI_input.value = GM_getValue("SteamAPI", "");
+      SteamAPI_input.style.width = "300px";
+      SteamAPI_input.style.marginTop = "5px";
+      SteamAPI_input.style.marginBottom = "5px";
+      const saveBtn = document.createElement("button");
+      saveBtn.textContent = "Save";
+      saveBtn.style.marginTop = "8px";
+      saveBtn.style.marginLeft = "10px";
+      saveBtn.className = "btn btn-success";
+      saveBtn.addEventListener("click", () => {
+        GM_setValue("SteamAPI", SteamAPI_input.value);
+        alert("Steam API Key saved!");
+      });
+      const BackpackTFAPILabel = document.createElement("label");
+      BackpackTFAPILabel.style.color = color_text_light;
+      BackpackTFAPILabel.textContent = "BacpackTF API Key:";
+      BackpackTFAPILabel.style.display = "block";
+      const BackpackTFAPI_input = document.createElement("input");
+      BackpackTFAPI_input.style.border = "1px solid #ccc";
+      BackpackTFAPI_input.style.borderRadius = "4px";
+      BackpackTFAPI_input.type = "password";
+      BackpackTFAPI_input.value = GM_getValue("BackpackTF_API", "");
+      BackpackTFAPI_input.style.width = "300px";
+      BackpackTFAPI_input.style.marginTop = "5px";
+      BackpackTFAPI_input.style.marginBottom = "5px";
+      const BackpackTFAPI_saveBtn = document.createElement("button");
+      BackpackTFAPI_saveBtn.textContent = "Save";
+      BackpackTFAPI_saveBtn.style.marginTop = "10px";
+      BackpackTFAPI_saveBtn.style.marginLeft = "10px";
+      BackpackTFAPI_saveBtn.className = "btn btn-success";
+      BackpackTFAPI_saveBtn.addEventListener("click", () => {
+        GM_setValue("BackpackTF_API", BackpackTFAPI_input.value);
+        alert("BackpackTF API Key saved!");
+      });
+      const BackpackTFTOKENLabel = document.createElement("label");
+      BackpackTFTOKENLabel.style.color = color_text_light;
+      BackpackTFTOKENLabel.textContent = "BacpackTF TOKEN Key:";
+      BackpackTFTOKENLabel.style.display = "block";
+      const BackpackTFTOKEN_input = document.createElement("input");
+      BackpackTFTOKEN_input.style.border = "1px solid #ccc";
+      BackpackTFTOKEN_input.style.borderRadius = "4px";
+      BackpackTFTOKEN_input.type = "password";
+      BackpackTFTOKEN_input.value = GM_getValue("BackpackTF_TOKEN", "");
+      BackpackTFTOKEN_input.style.width = "300px";
+      BackpackTFTOKEN_input.style.marginTop = "5px";
+      BackpackTFTOKEN_input.style.marginBottom = "5px";
+      const BackpackTFTOKEN_saveBtn = document.createElement("button");
+      BackpackTFTOKEN_saveBtn.textContent = "Save";
+      BackpackTFTOKEN_saveBtn.style.marginTop = "10px";
+      BackpackTFTOKEN_saveBtn.style.marginLeft = "10px";
+      BackpackTFTOKEN_saveBtn.className = "btn btn-success";
+      BackpackTFTOKEN_saveBtn.addEventListener("click", () => {
+        GM_setValue("BackpackTF_TOKEN", BackpackTFTOKEN_input.value);
+        alert("BackpackTF Token Key saved!");
+      });
+      panel.appendChild(SteamAPILabel);
+      panel.appendChild(SteamAPI_input);
+      panel.appendChild(saveBtn);
+      panel.appendChild(BackpackTFAPILabel);
+      panel.appendChild(BackpackTFAPI_input);
+      panel.appendChild(BackpackTFAPI_saveBtn);
+      panel.appendChild(BackpackTFTOKENLabel);
+      panel.appendChild(BackpackTFTOKEN_input);
+      panel.appendChild(BackpackTFTOKEN_saveBtn);
+      panel.appendChild(getSupportDiv());
+    }
+    function createWallpaperMenu() {
+      const menuContainer = document.createElement("div");
+      menuContainer.style.width = "300px";
+      menuContainer.style.maxHeight = "350px";
+      menuContainer.style.overflowY = "auto";
+      menuContainer.style.paddingRight = "5px";
+      function addSettingRow(labelText, element) {
+        const row = document.createElement("div");
+        row.style.marginBottom = "10px";
+        const lbl = document.createElement("label");
+        lbl.textContent = labelText;
+        lbl.style.color = color_text_light;
+        lbl.style.display = "block";
+        lbl.style.fontSize = "13px";
+        lbl.style.fontWeight = "bold";
+        lbl.style.marginBottom = "2px";
+        element.style.width = "100%";
+        element.style.boxSizing = "border-box";
+        row.appendChild(lbl);
+        row.appendChild(element);
+        menuContainer.appendChild(row);
+        return lbl;
+      }
+      const wpInput = document.createElement("input");
+      wpInput.type = "text";
+      wpInput.placeholder = "https://example.com/image.gif";
+      wpInput.value = GM_getValue("Wallpaper_URL", "");
+      wpInput.style.padding = "4px";
+      addSettingRow("Background URL:", wpInput);
+      const sizeSelect = document.createElement("select");
+      ["cover", "contain", "auto", "100% 100%"].forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        if (opt === GM_getValue("Wallpaper_Size", "cover")) option.selected = true;
+        sizeSelect.appendChild(option);
+      });
+      sizeSelect.style.padding = "4px";
+      addSettingRow("Background Size:", sizeSelect);
+      const repeatSelect = document.createElement("select");
+      ["no-repeat", "repeat", "repeat-x", "repeat-y"].forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        if (opt === GM_getValue("Wallpaper_Repeat", "no-repeat")) option.selected = true;
+        repeatSelect.appendChild(option);
+      });
+      repeatSelect.style.padding = "4px";
+      addSettingRow("Background Repeat:", repeatSelect);
+      const attachSelect = document.createElement("select");
+      ["fixed", "scroll", "local"].forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        if (opt === GM_getValue("Wallpaper_Attachment", "fixed")) option.selected = true;
+        attachSelect.appendChild(option);
+      });
+      attachSelect.style.padding = "4px";
+      addSettingRow("Background Attachment:", attachSelect);
+      const opacityInput = document.createElement("input");
+      opacityInput.type = "range";
+      opacityInput.min = "0.1";
+      opacityInput.max = "1.0";
+      opacityInput.step = "0.05";
+      opacityInput.value = GM_getValue("Wallpaper_Opacity", "1");
+      const opacityLabel = addSettingRow("Container Opacity: ", opacityInput);
+      opacityLabel.style.color = color_text_light;
+      const opacityValSpan = document.createElement("span");
+      opacityValSpan.textContent = opacityInput.value;
+      opacityValSpan.style.fontWeight = "normal";
+      opacityLabel.appendChild(opacityValSpan);
+      opacityInput.addEventListener("input", () => {
+        opacityValSpan.textContent = opacityInput.value;
+      });
+      const btnContainer = document.createElement("div");
+      btnContainer.style.display = "flex";
+      btnContainer.style.gap = "10px";
+      btnContainer.style.marginTop = "15px";
+      const wpSaveBtn = document.createElement("button");
+      wpSaveBtn.textContent = "Save";
+      wpSaveBtn.className = "btn btn-success";
+      wpSaveBtn.style.flex = "1";
+      wpSaveBtn.addEventListener("click", () => {
+        GM_setValue("Wallpaper_URL", wpInput.value);
+        GM_setValue("Wallpaper_Size", sizeSelect.value);
+        GM_setValue("Wallpaper_Repeat", repeatSelect.value);
+        GM_setValue("Wallpaper_Attachment", attachSelect.value);
+        GM_setValue("Wallpaper_Opacity", opacityInput.value);
+        applyWallpaper();
+      });
+      const wpClearBtn = document.createElement("button");
+      wpClearBtn.textContent = "Clear";
+      wpClearBtn.className = "btn btn-danger";
+      wpClearBtn.style.flex = "1";
+      wpClearBtn.addEventListener("click", () => {
+        GM_setValue("Wallpaper_URL", "");
+        wpInput.value = "";
+        sizeSelect.value = "cover";
+        repeatSelect.value = "no-repeat";
+        attachSelect.value = "fixed";
+        opacityInput.value = "1";
+        opacityValSpan.textContent = "1";
+        GM_setValue("Wallpaper_Size", "cover");
+        GM_setValue("Wallpaper_Repeat", "no-repeat");
+        GM_setValue("Wallpaper_Attachment", "fixed");
+        GM_setValue("Wallpaper_Opacity", "1");
+        applyWallpaper();
+      });
+      btnContainer.appendChild(wpSaveBtn);
+      btnContainer.appendChild(wpClearBtn);
+      menuContainer.appendChild(btnContainer);
+      panel.appendChild(menuContainer);
+      panel.appendChild(getSupportDiv());
+    }
+    createMain();
+    document.body.appendChild(panel);
+    document.addEventListener("click", function closeOnOutsideClick(event2) {
+      if (event2.composedPath().includes(panel)) return;
+      panel.remove();
+      document.removeEventListener("click", closeOnOutsideClick);
+    });
+  }
+
+  // src/common/enums.js
+  var OfferStatus = Object.freeze({
+    STARTED: "started",
+    LOADING_INVENTORIES: "loading_inventories",
+    BUILDING_OFFER: "building_offer",
+    SENDING: "sending",
+    SENT: "sent",
+    ERROR: "error"
+  });
+  var OfferError = Object.freeze({
+    INVALID_PRICE: "invalid_price",
+    INSUFFICIENT_KEYS: "insufficient_keys",
+    INSUFFICIENT_METAL: "insufficient_metal",
+    ITEM_NOT_FOUND: "item_not_found",
+    ITEM_SOLD: "item_sold",
+    CANNOT_BALANCE: "cannot_balance",
+    INVENTORY_TIMEOUT: "inventory_timeout",
+    INVENTORY_LOAD_FAILED: "inventory_load_failed",
+    SEND_FAILED: "send_failed"
+  });
+
+  // src/steam/offer-status.js
+  function get_offer_status() {
+    return document.documentElement.getAttribute("data-one-click-offer-status");
+  }
+  function set_offer_status(status, errorId, message) {
+    const root = document.documentElement;
+    root.setAttribute("data-one-click-offer-status", status);
+    if (errorId) {
+      root.setAttribute("data-one-click-offer-error-id", errorId);
+      root.setAttribute("data-one-click-offer-error-message", message);
+    } else {
+      root.removeAttribute("data-one-click-offer-error-id");
+      root.removeAttribute("data-one-click-offer-error-message");
     }
   }
 
@@ -525,7 +565,9 @@
   function waitFor(seconds) {
     return new Promise((res) => setTimeout(res, seconds * 1e3));
   }
-  function throwError(err) {
+  function throwError(code, err) {
+    if (get_offer_status() === OfferStatus.ERROR) throw err;
+    set_offer_status(OfferStatus.ERROR, code, String(err));
     const params = new URLSearchParams(location.search);
     const buy_sell = params.has("for_item") ? "Buy" : "Sell";
     const item = params.get("tscript_name");
@@ -981,7 +1023,22 @@
   }
 
   // src/next_backpack/index.js
+  async function addSettingsButton() {
+    await awaitDocumentReady();
+    new MutationObserver(() => {
+      const footer = document.querySelector(".mission-control__footer__left");
+      if (!footer || footer.querySelector(".oco-settings-btn")) return;
+      const btn = document.createElement("a");
+      btn.className = "btn btn-outline-brand ms-1 oco-settings-btn";
+      btn.textContent = "\u2699\uFE0F";
+      btn.title = "One Click Offer settings";
+      btn.style.background = next_btn_color;
+      btn.addEventListener("click", toggleSettingsPanel);
+      footer.appendChild(btn);
+    }).observe(document.body, { childList: true, subtree: true });
+  }
   async function run2() {
+    addSettingsButton();
     let listings_data = void 0;
     interceptSearchRequests();
     if (location.pathname.startsWith("/stats")) {
@@ -1181,9 +1238,12 @@
       UserThem.LoadForeignAppContextData(g_ulTradePartnerSteamID, 440, 2);
       let done = false;
       setTimeout(() => {
-        if (!done) throwError("[getInventories]: Timeout waiting for inventory data.");
+        if (done) return;
+        done = true;
+        throwError(OfferError.INVENTORY_TIMEOUT, "[getInventories]: Timeout waiting for inventory data.");
       }, 15e3);
       const inventories = await Promise.all([getSingleInventory(UserYou), getSingleInventory(UserThem)]);
+      if (done) return;
       done = true;
       res(inventories);
     });
@@ -1248,17 +1308,17 @@
     let body;
     try {
       const response = await fetch("https://steamcommunity.com/inventory/" + steam_id + "/440/2?count=2000&l=english");
-      if (!response.ok) throwError("[getInventory]: response status error: " + response.status);
+      if (!response.ok) throwError(OfferError.INVENTORY_LOAD_FAILED, "[getInventory]: response status error: " + response.status);
       body = await response.json();
       if (body.more_items) {
         const moreResponse = await fetch("https://steamcommunity.com/inventory/" + steam_id + "/440/2?count=1000&more_start=1000&l=english");
-        if (!moreResponse.ok) throwError("[getInventory]: more_response status error: " + moreResponse.status);
+        if (!moreResponse.ok) throwError(OfferError.INVENTORY_LOAD_FAILED, "[getInventory]: more_response status error: " + moreResponse.status);
         const more_body = await moreResponse.json();
         body.assets = body.assets.concat(more_body.assets);
         body.descriptions = body.descriptions.concat(more_body.descriptions);
       }
     } catch (err) {
-      return throwError("[getInventory]: Could not obtain inventory data: " + err);
+      return throwError(OfferError.INVENTORY_LOAD_FAILED, "[getInventory]: Could not obtain inventory data: " + err);
     }
     const quickDescriptionLookup = {};
     const inv = [];
@@ -1296,15 +1356,18 @@
     };
     const form = new FormData();
     for (let key in body) form.append(key, body[key]);
+    let response_body;
     try {
-      const response_body = await (await fetch("https://steamcommunity.com/tradeoffer/new/send", {
+      response_body = await (await fetch("https://steamcommunity.com/tradeoffer/new/send", {
         method: "POST",
         body: form
       })).json();
-      if (response_body.strError) return throwError("[sendOffer]: " + response_body.strError);
-      return response_body.tradeofferid;
-    } catch {
+    } catch (err) {
+      return throwError(OfferError.SEND_FAILED, "[sendOffer]: " + err);
     }
+    if (response_body.strError) return throwError(OfferError.SEND_FAILED, "[sendOffer]: " + response_body.strError);
+    if (!response_body.tradeofferid) return throwError(OfferError.SEND_FAILED, "[sendOffer]: No trade offer id in response: " + JSON.stringify(response_body));
+    return response_body.tradeofferid;
   }
   function normalizeName(name) {
     if (name.startsWith("Non-Craftable The ")) {
@@ -1347,7 +1410,7 @@
   }
   function toCurrencyTypes(currencyString, count) {
     const match = currencyString.match(/^(\d+ keys?,? ?)?(\d+(?:\.\d+)? ref)?$/);
-    if (!match) return throwError("[toCurrencyTypes]: Could not parse currency: " + currencyString);
+    if (!match) return throwError(OfferError.INVALID_PRICE, "[toCurrencyTypes]: Could not parse currency: " + currencyString);
     let keys = 0;
     let metal = 0;
     if (match[1]) {
@@ -1410,9 +1473,9 @@
     DEBUG && console.log("[pickCurrency]: Inventory:", inventory);
     DEBUG && console.log("[pickCurrency]: Inventory (half scrap):", invHalfScrap);
     console.log("[pickCurrency]: Half scrap in the start: " + halfScrap);
-    if (invKeys.length < keys) return throwError("[pickCurrency]: Insufficient Keys");
-    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return throwError("[pickCurrency]: Insufficient Metal");
-    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return throwError("[pickCurrency]: Insufficient Metal");
+    if (invKeys.length < keys) return throwError(OfferError.INSUFFICIENT_KEYS, "[pickCurrency]: Insufficient Keys");
+    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
     let leftoverRef = invRef.length - ref;
     let leftoverRec = invRec.length - rec;
     let leftoverScrap = invScrap.length - scrap;
@@ -1451,7 +1514,7 @@
       leftoverRec = 0;
     }
     if (leftoverScrap < 0) {
-      if (leftoverHalfScrap < -leftoverScrap * 2) return throwError("[pickCurrency]: Insufficient Metal");
+      if (leftoverHalfScrap < -leftoverScrap * 2) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
       scrap -= leftoverScrap;
       halfScrap += -leftoverScrap * 2;
       leftoverHalfScrap -= -leftoverScrap * 2;
@@ -1555,11 +1618,14 @@
   async function run3() {
     const params = new URLSearchParams(location.search);
     if (!params.has("tscript_price")) return;
+    set_offer_status(OfferStatus.STARTED);
     interceptInventoryRequest();
     await awaitDocumentReady();
     let itemsToGive = [];
     let itemsToReceive = [];
+    set_offer_status(OfferStatus.LOADING_INVENTORIES);
     let [ourInventory, theirInventory] = await getInventories();
+    set_offer_status(OfferStatus.BUILDING_OFFER);
     window.our_inv = ourInventory;
     window.their_inv = theirInventory;
     const validTradeOfferStates = [2, 4, 9];
@@ -1622,7 +1688,7 @@
           neededItems.push(itemsByName[i]);
         }
       }
-      if (!neededItems) return throwError("[Buy Order]: Could not find item in your inventory.");
+      if (!neededItems) return throwError(OfferError.ITEM_NOT_FOUND, "[Buy Order]: Could not find item in your inventory.");
       let actualCount = neededItems.length;
       if (requestedCount == actualCount) {
         console.log(`[Buy Order]: Requested ${requestedCount}, Found ${actualCount}`);
@@ -1654,7 +1720,7 @@
         for (const c of theirCurrency) itemsToReceive.push(toTradeOfferItem(c.id));
         break;
       }
-      if (actualCount === 0) return throwError("[Buy Order]: Could not balance currencies.");
+      if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Buy Order]: Could not balance currencies.");
     } else {
       const itemId = params.get("tscript_id");
       const itemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
@@ -1691,7 +1757,7 @@
           neededItems.push(itemsByName[i]);
         }
       }
-      if (!neededItems) return throwError("[Sell Order]: Item(-s) has already been sold.");
+      if (!neededItems) return throwError(OfferError.ITEM_SOLD, "[Sell Order]: Item(-s) has already been sold.");
       let actualCount = neededItems.length;
       if (actualCount == requestedCount) {
         console.log(`[Sell Order]: Requested ${requestedCount}, Found ${actualCount}`);
@@ -1730,10 +1796,14 @@
         }
         break;
       }
-      if (actualCount === 0) return throwError("[Sell Order]: Could not balance currencies.");
+      if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Sell Order]: Could not balance currencies.");
     }
+    set_offer_status(OfferStatus.SENDING);
     const offerId = await sendOffer(itemsToGive, itemsToReceive);
-    if (offerId) console.log("[One-Click-Offer/Final]: Success");
+    if (offerId) {
+      set_offer_status(OfferStatus.SENT);
+      console.log("[One-Click-Offer/Final]: Success");
+    }
     if (offerId && !DEBUG) window.close();
   }
 

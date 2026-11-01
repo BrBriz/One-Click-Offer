@@ -13,3 +13,7 @@ export function set_offer_status(status, errorId, message) {
         root.removeAttribute("data-one-click-offer-error-message");
     }
 }
+
+export function set_offer_count(count) {
+    document.documentElement.setAttribute("data-one-click-offer-count", count);
+}

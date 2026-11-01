@@ -5,7 +5,7 @@ import { normalizeName, toTradeOfferItem, sendOffer } from "./trade-offer.js";
 import { toCurrencyTypes, pickCurrency } from "./currency.js";
 import { DEBUG } from "../common/constants.js";
 import { OfferError, OfferStatus } from "../common/enums.js";
-import { set_offer_status } from "./offer-status.js";
+import { set_offer_status, set_offer_count } from "./offer-status.js";
 
 export async function run() {
     const params = new URLSearchParams(location.search);
@@ -17,6 +17,7 @@ export async function run() {
 
     let itemsToGive = [];
     let itemsToReceive = [];
+    let sentCount = 0; // listed items only, never the keys/metal added to balance
 
     set_offer_status(OfferStatus.LOADING_INVENTORIES);
     let [ourInventory, theirInventory] = await getInventories();
@@ -134,6 +135,7 @@ export async function run() {
         }
 
         if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Buy Order]: Could not balance currencies.");
+        sentCount = actualCount;
 
     } else {
         const itemId = params.get("tscript_id");
@@ -230,12 +232,14 @@ export async function run() {
         }
 
         if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Sell Order]: Could not balance currencies.");
+        sentCount = actualCount;
 
     }
 
     set_offer_status(OfferStatus.SENDING);
     const offerId = await sendOffer(itemsToGive, itemsToReceive);
     if (offerId) {
+        set_offer_count(sentCount);
         set_offer_status(OfferStatus.SENT);
         console.log("[One-Click-Offer/Final]: Success");
     }

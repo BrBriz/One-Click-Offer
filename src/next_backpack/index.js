@@ -1,9 +1,27 @@
 import { awaitDocumentReady, waitFor } from "../common/dom-utils.js";
 import { next_btn_color, DEBUG } from "../common/constants.js";
+import { toggleSettingsPanel } from "../backpack/settings-panel.js";
 
+//the user menu is only rendered while open, so re-add the button whenever it appears
+async function addSettingsButton() {
+    await awaitDocumentReady();
+    new MutationObserver(() => {
+        const footer = document.querySelector(".mission-control__footer__left");
+        if (!footer || footer.querySelector(".oco-settings-btn")) return;
+
+        const btn = document.createElement("a");
+        btn.className = "btn btn-outline-brand ms-1 oco-settings-btn";
+        btn.textContent = "⚙️";
+        btn.title = "One Click Offer settings";
+        btn.style.background = next_btn_color;
+        btn.addEventListener("click", toggleSettingsPanel);
+        footer.appendChild(btn);
+    }).observe(document.body, { childList: true, subtree: true });
+}
 
 export async function run() {
     //next does not refresh page between pages, so script needs to run on any next page
+    addSettingsButton();
     let listings_data = undefined;
     interceptSearchRequests();
     if (location.pathname.startsWith("/stats")) { //Ignore errors, I don't know who this made

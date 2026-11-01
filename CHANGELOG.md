@@ -10,8 +10,12 @@ We use a **X.X.X.x** versioning system
   - `data-one-click-offer-status`: current offer status
   - `data-one-click-offer-error-id`: error identifier, when an error occurs
   - `data-one-click-offer-error-message`: error description, when an error occurs
+  - `data-one-click-offer-count`: number of listed items (no keys/metal) in the sent offer
 - See `src/common/enums.js` for supported status values 
- 
+- Settings panel for `next.backpack.tf` 
+
+![SettingsButtonNext](/images/SettingPanelOnNextBackpack.png)
+
 ## [3.1.1.1] - 2026-10-02
 ### Changed
 - Default Opacity now is 1, instead 0.8, which no more making site content like "grey"
