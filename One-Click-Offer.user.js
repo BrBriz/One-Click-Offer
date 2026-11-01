@@ -554,6 +554,9 @@
       root.removeAttribute("data-one-click-offer-error-message");
     }
   }
+  function set_offer_count(count) {
+    document.documentElement.setAttribute("data-one-click-offer-count", count);
+  }
 
   // src/common/dom-utils.js
   function awaitDocumentReady() {
@@ -1623,6 +1626,7 @@
     await awaitDocumentReady();
     let itemsToGive = [];
     let itemsToReceive = [];
+    let sentCount = 0;
     set_offer_status(OfferStatus.LOADING_INVENTORIES);
     let [ourInventory, theirInventory] = await getInventories();
     set_offer_status(OfferStatus.BUILDING_OFFER);
@@ -1721,6 +1725,7 @@
         break;
       }
       if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Buy Order]: Could not balance currencies.");
+      sentCount = actualCount;
     } else {
       const itemId = params.get("tscript_id");
       const itemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
@@ -1797,10 +1802,12 @@
         break;
       }
       if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Sell Order]: Could not balance currencies.");
+      sentCount = actualCount;
     }
     set_offer_status(OfferStatus.SENDING);
     const offerId = await sendOffer(itemsToGive, itemsToReceive);
     if (offerId) {
+      set_offer_count(sentCount);
       set_offer_status(OfferStatus.SENT);
       console.log("[One-Click-Offer/Final]: Success");
     }
