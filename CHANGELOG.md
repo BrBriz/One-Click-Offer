@@ -4,6 +4,14 @@
 
 We use a **X.X.X.x** versioning system
 
+## [3.1.3] - 2026-11-17
+### Fixed
+- Buying multiple items like `Non-Craftable The Festivizer` sent an offer for only one
+- Multiple items failed with `Insufficient Metal` when the other side couldn't give change
+- Missing trade buttons on `next.backpack.tf` item pages
+### Changed
+- If not all requested items fit, the offer is sent with fewer and an alert says how many
+
 ## [3.1.2] - 2026-10-31
 ### Added
 - DOM attributes for parser scripts to read the offer status:

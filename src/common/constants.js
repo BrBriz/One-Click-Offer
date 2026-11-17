@@ -8,6 +8,7 @@ export const bg_secondary = "#0D2818";
 export const color_text_dark = "#0D1321";
 export const color_text_light = "#FFEDDF";
 export const DEBUG = false;
+export const alert_partial_offer = true; // alert when fewer items than requested go into the offer
 
 // Items which are priced with half-scrap precision on backpack.tf
 export const itemsWithPriceHalfScrap = new Set([

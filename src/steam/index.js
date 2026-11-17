@@ -3,7 +3,7 @@ import { config, GetTradeOffers, GetTradeOffers_params } from "../common/config.
 import { interceptInventoryRequest, getInventories } from "./inventory.js";
 import { normalizeName, toTradeOfferItem, sendOffer } from "./trade-offer.js";
 import { toCurrencyTypes, pickCurrency } from "./currency.js";
-import { DEBUG } from "../common/constants.js";
+import { DEBUG, alert_partial_offer } from "../common/constants.js";
 import { OfferError, OfferStatus } from "../common/enums.js";
 import { set_offer_status, set_offer_count } from "./offer-status.js";
 
@@ -56,6 +56,8 @@ export async function run() {
         ...item,
         name: normalizeName(item.name)
     }));
+    // tscript_name is in next.backpack.tf style, while Steam says e.g. "Non-Craftable The Festivizer"
+    theirInventory = theirInventory.map(item => ({ ...item, name: normalizeName(item.name) }));
 
     if (!params.has("tscript_id")) {
         const neededItemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
@@ -116,8 +118,9 @@ export async function run() {
             const [theirCurrency, change] = pickCurrency(theirInventory, ...currencies);
 
             if (change.find(c => c !== 0)) {
-                const [ourCurrency, change2] = pickCurrency(ourFilteredInventory, 0, ...change);
-                if (change2.find(c => c !== 0)) {
+                const changePick = pickCurrency(ourFilteredInventory, 0, ...change, true);
+                // null: we can't give that change at all, so retry with one item less like an unbalanced change
+                if (!changePick || changePick[1].find(c => c !== 0)) {
                     actualCount--;
                     // Remove one item to try new balance
                     for (let i = 0; i < neededItems.length; i++) {
@@ -126,7 +129,7 @@ export async function run() {
                     }
                     continue;
                 }
-                for (const c of ourCurrency) tempItemsToGive.push(toTradeOfferItem(c.id));
+                for (const c of changePick[0]) tempItemsToGive.push(toTradeOfferItem(c.id));
             }
             console.warn(`[Buy Order]: Actual count balanced items: ${actualCount}`);
             itemsToGive = tempItemsToGive;
@@ -136,6 +139,7 @@ export async function run() {
 
         if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Buy Order]: Could not balance currencies.");
         sentCount = actualCount;
+        if (alert_partial_offer && actualCount < requestedCount) window.alert(`[One-Click-Offer]: Only ${actualCount} of ${requestedCount} items could be added (not enough items, or the currency could not be balanced).`);
 
     } else {
         const itemId = params.get("tscript_id");
@@ -207,9 +211,10 @@ export async function run() {
             const [ourCurrency, change] = pickCurrency(ourFilteredInventory, ...totalPrice);
 
             if (change.find(c => c !== 0)) {
-                const [theirCurrency, change2] = pickCurrency(theirInventory, 0, ...change);
-                console.log("[Post_pickCurrency]: change 2 " + change2);
-                if (change2.find(c => c !== 0)) {
+                const changePick = pickCurrency(theirInventory, 0, ...change, true);
+                console.log("[Post_pickCurrency]: change 2 " + changePick?.[1]);
+                // null: they can't give that change at all, so retry with one item less like an unbalanced change
+                if (!changePick || changePick[1].find(c => c !== 0)) {
                     actualCount--;
                     // Remove one item to try new balance
                     for (let i = 0; i < neededItems.length; i++) {
@@ -220,7 +225,7 @@ export async function run() {
                     }
                     continue;
                 }
-                for (let c of theirCurrency) tempItemsToReceive.push(toTradeOfferItem(c.id));
+                for (let c of changePick[0]) tempItemsToReceive.push(toTradeOfferItem(c.id));
             }
             console.warn(`[Sell Order]: Actual count balanced items: ${actualCount}`);
             itemsToReceive = tempItemsToReceive;
@@ -233,6 +238,7 @@ export async function run() {
 
         if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Sell Order]: Could not balance currencies.");
         sentCount = actualCount;
+        if (alert_partial_offer && actualCount < requestedCount) window.alert(`[One-Click-Offer]: Only ${actualCount} of ${requestedCount} items could be added (not enough items, or the currency could not be balanced).`);
 
     }
 

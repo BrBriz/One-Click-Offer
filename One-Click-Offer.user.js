@@ -2,7 +2,7 @@
 // @name         One-Click Offer
 // @namespace    https://github.com/BrBriz/One-Click-Offer
 // @homepage     https://github.com/BrBriz
-// @version      3.1.2
+// @version      3.1.3
 // @description  Adds a button on backpack.tf listings that instantly sends the offer.
 // @author       BrBriz
 // @updateURL    https://github.com/BrBriz/One-Click-Offer/raw/main/One-Click-Offer.user.js
@@ -32,6 +32,7 @@
   var bg_secondary = "#0D2818";
   var color_text_light = "#FFEDDF";
   var DEBUG = false;
+  var alert_partial_offer = true;
   var itemsWithPriceHalfScrap = /* @__PURE__ */ new Set([
     "Rocket Jumper",
     "Quick-Fix",
@@ -1046,10 +1047,11 @@
     interceptSearchRequests();
     if (location.pathname.startsWith("/stats")) {
       await awaitDocumentReady();
-      while (!__NUXT__?.fetch?.["data-v-58d43071:0"]?.listings && !__NUXT__?.fetch?.["data-v-39eb0133:0"]?.listings) {
+      const findListings = () => Object.values(__NUXT__?.fetch ?? {}).find((data) => data?.listings)?.listings;
+      let listings;
+      while (!(listings = findListings())) {
         await waitFor(0.1);
       }
-      const listings = __NUXT__.fetch["data-v-58d43071:0"]?.listings || __NUXT__.fetch["data-v-39eb0133:0"].listings;
       listings_data = listings.buy.items.concat(listings.sell.items);
       addSenderButtons();
     }
@@ -1454,7 +1456,7 @@
     keys = keys * count;
     return correctCurrency([keys, ref, rec, scrap, halfScrap]);
   }
-  function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
+  function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap, quiet = false) {
     const invKeys = inventory.filter((item) => item.name === "Mann Co. Supply Crate Key");
     const invRef = inventory.filter((item) => item.name === "Refined Metal");
     const invRec = inventory.filter((item) => item.name === "Reclaimed Metal");
@@ -1476,9 +1478,9 @@
     DEBUG && console.log("[pickCurrency]: Inventory:", inventory);
     DEBUG && console.log("[pickCurrency]: Inventory (half scrap):", invHalfScrap);
     console.log("[pickCurrency]: Half scrap in the start: " + halfScrap);
-    if (invKeys.length < keys) return throwError(OfferError.INSUFFICIENT_KEYS, "[pickCurrency]: Insufficient Keys");
-    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
-    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+    if (invKeys.length < keys) return quiet ? null : throwError(OfferError.INSUFFICIENT_KEYS, "[pickCurrency]: Insufficient Keys");
+    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return quiet ? null : throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return quiet ? null : throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
     let leftoverRef = invRef.length - ref;
     let leftoverRec = invRec.length - rec;
     let leftoverScrap = invScrap.length - scrap;
@@ -1517,7 +1519,7 @@
       leftoverRec = 0;
     }
     if (leftoverScrap < 0) {
-      if (leftoverHalfScrap < -leftoverScrap * 2) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+      if (leftoverHalfScrap < -leftoverScrap * 2) return quiet ? null : throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
       scrap -= leftoverScrap;
       halfScrap += -leftoverScrap * 2;
       leftoverHalfScrap -= -leftoverScrap * 2;
@@ -1659,6 +1661,7 @@
       ...item,
       name: normalizeName(item.name)
     }));
+    theirInventory = theirInventory.map((item) => ({ ...item, name: normalizeName(item.name) }));
     if (!params.has("tscript_id")) {
       const neededItemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
       const currencyString = params.get("tscript_price");
@@ -1708,8 +1711,8 @@
         const currencies = toCurrencyTypes(currencyString, actualCount);
         const [theirCurrency, change] = pickCurrency(theirInventory, ...currencies);
         if (change.find((c) => c !== 0)) {
-          const [ourCurrency, change2] = pickCurrency(ourFilteredInventory, 0, ...change);
-          if (change2.find((c) => c !== 0)) {
+          const changePick = pickCurrency(ourFilteredInventory, 0, ...change, true);
+          if (!changePick || changePick[1].find((c) => c !== 0)) {
             actualCount--;
             for (let i = 0; i < neededItems.length; i++) {
               neededItems.splice(i, 1);
@@ -1717,7 +1720,7 @@
             }
             continue;
           }
-          for (const c of ourCurrency) tempItemsToGive.push(toTradeOfferItem(c.id));
+          for (const c of changePick[0]) tempItemsToGive.push(toTradeOfferItem(c.id));
         }
         console.warn(`[Buy Order]: Actual count balanced items: ${actualCount}`);
         itemsToGive = tempItemsToGive;
@@ -1726,6 +1729,7 @@
       }
       if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Buy Order]: Could not balance currencies.");
       sentCount = actualCount;
+      if (alert_partial_offer && actualCount < requestedCount) window.alert(`[One-Click-Offer]: Only ${actualCount} of ${requestedCount} items could be added (not enough items, or the currency could not be balanced).`);
     } else {
       const itemId = params.get("tscript_id");
       const itemName = decodeURIComponent(decodeURIComponent(params.get("tscript_name"))).replace("u0023", "#");
@@ -1780,9 +1784,9 @@
         console.log(`[Sell Order]: Total price for ${actualCount} items: ${totalPrice}`);
         const [ourCurrency, change] = pickCurrency(ourFilteredInventory, ...totalPrice);
         if (change.find((c) => c !== 0)) {
-          const [theirCurrency, change2] = pickCurrency(theirInventory, 0, ...change);
-          console.log("[Post_pickCurrency]: change 2 " + change2);
-          if (change2.find((c) => c !== 0)) {
+          const changePick = pickCurrency(theirInventory, 0, ...change, true);
+          console.log("[Post_pickCurrency]: change 2 " + changePick?.[1]);
+          if (!changePick || changePick[1].find((c) => c !== 0)) {
             actualCount--;
             for (let i = 0; i < neededItems.length; i++) {
               if (neededItems[i].id !== itemId) {
@@ -1792,7 +1796,7 @@
             }
             continue;
           }
-          for (let c of theirCurrency) tempItemsToReceive.push(toTradeOfferItem(c.id));
+          for (let c of changePick[0]) tempItemsToReceive.push(toTradeOfferItem(c.id));
         }
         console.warn(`[Sell Order]: Actual count balanced items: ${actualCount}`);
         itemsToReceive = tempItemsToReceive;
@@ -1803,6 +1807,7 @@
       }
       if (actualCount === 0) return throwError(OfferError.CANNOT_BALANCE, "[Sell Order]: Could not balance currencies.");
       sentCount = actualCount;
+      if (alert_partial_offer && actualCount < requestedCount) window.alert(`[One-Click-Offer]: Only ${actualCount} of ${requestedCount} items could be added (not enough items, or the currency could not be balanced).`);
     }
     set_offer_status(OfferStatus.SENDING);
     const offerId = await sendOffer(itemsToGive, itemsToReceive);

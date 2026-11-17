@@ -26,10 +26,12 @@ export async function run() {
     interceptSearchRequests();
     if (location.pathname.startsWith("/stats")) { //Ignore errors, I don't know who this made
         await awaitDocumentReady();
-        while (!__NUXT__?.fetch?.["data-v-58d43071:0"]?.listings && !__NUXT__?.fetch?.["data-v-39eb0133:0"]?.listings) {
+        // the fetch key ("data-v-<hash>:0") changes with every site build, so find the entry by its listings
+        const findListings = () => Object.values(__NUXT__?.fetch ?? {}).find(data => data?.listings)?.listings;
+        let listings;
+        while (!(listings = findListings())) {
             await waitFor(0.1); //wait for listings request ready
         }
-        const listings = __NUXT__.fetch["data-v-58d43071:0"]?.listings || __NUXT__.fetch["data-v-39eb0133:0"].listings;
         listings_data = listings.buy.items.concat(listings.sell.items);
         addSenderButtons();
     }

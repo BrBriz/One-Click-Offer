@@ -55,3 +55,10 @@ test("toCurrencyTypes: unparsable price throws invalid_price", () => {
     assert.throws(() => toCurrencyTypes("abc", 1));
     assert.equal(pageAttr("data-one-click-offer-error-id"), "invalid_price");
 });
+
+test("pickCurrency quiet: change side short on metal returns null without an error", () => {
+    const sellerInventory = items("Scrap Metal", 1);
+
+    assert.equal(pickCurrency(sellerInventory, 0, 0, 0, 2, 0, true), null);
+    assert.equal(pageAttr("data-one-click-offer-status"), null);
+});

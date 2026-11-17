@@ -75,7 +75,8 @@ export function toCurrencyTypes(currencyString, count) {
     return correctCurrency([keys, ref, rec, scrap, halfScrap]);
 }
 
-export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
+// quiet: return null instead of throwing when the inventory is short (used for the change side)
+export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap, quiet = false) {
     const invKeys = inventory.filter(item => item.name === "Mann Co. Supply Crate Key");
     const invRef = inventory.filter(item => item.name === "Refined Metal");
     const invRec = inventory.filter(item => item.name === "Reclaimed Metal");
@@ -98,9 +99,9 @@ export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
     DEBUG && console.log("[pickCurrency]: Inventory:", inventory);
     DEBUG && console.log("[pickCurrency]: Inventory (half scrap):", invHalfScrap)
     console.log("[pickCurrency]: Half scrap in the start: " + halfScrap);
-    if (invKeys.length < keys) return throwError(OfferError.INSUFFICIENT_KEYS, "[pickCurrency]: Insufficient Keys");
-    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
-    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+    if (invKeys.length < keys) return quiet ? null : throwError(OfferError.INSUFFICIENT_KEYS, "[pickCurrency]: Insufficient Keys");
+    if (allow_change && invRef.length + invRec.length / 3 + invScrap.length / 9 + invHalfScrap.length / 20 < ref + rec / 3 + scrap / 9 + halfScrap / 20) return quiet ? null : throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+    if (!allow_change && (invRef.length < ref || invRec.length < rec || invScrap.length < scrap || invHalfScrap.length < halfScrap)) return quiet ? null : throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
 
     let leftoverRef = invRef.length - ref;
     let leftoverRec = invRec.length - rec;
@@ -151,7 +152,7 @@ export function pickCurrency(inventory, keys, ref, rec, scrap, halfScrap) {
 
     //use half_scrap if not enough scrap
     if (leftoverScrap < 0) {
-        if (leftoverHalfScrap < -leftoverScrap * 2) return throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
+        if (leftoverHalfScrap < -leftoverScrap * 2) return quiet ? null : throwError(OfferError.INSUFFICIENT_METAL, "[pickCurrency]: Insufficient Metal");
 
         scrap -= leftoverScrap;
         halfScrap += -leftoverScrap * 2;
